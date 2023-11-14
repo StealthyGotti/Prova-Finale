@@ -1,5 +1,9 @@
 function [dv, thf, dt] = changeIncl (a, e, w, iin, ifin, thi)
 
+iin = deg2rad(iin);
+ifin = deg2rad(ifin);
+thi = deg2rad(thi);
+
 mu = 398600;
 
 di = ifin - iin;
@@ -23,3 +27,7 @@ dv = 2*sqrt(mu/p)*(1+e*cos(thm))*sin(abs(di)/2);
 dt = flightTime (a, e, thi, thm);
 
 thf = thm;
+
+thf = rad2deg(thf);
+
+end

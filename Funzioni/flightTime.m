@@ -1,5 +1,8 @@
 function dt = flightTime (a, e, thi, thf)
 
+thi = deg2rad(thi);
+thf = deg2rad(thf);
+
 mu = 398600;
 
 T = 2*pi*sqrt(a^3/mu);
@@ -16,4 +19,6 @@ if thi <= thf
     dt = t2 - t1;
 elseif thi > thf
     dt = T + (t2 - t1);
+end
+
 end

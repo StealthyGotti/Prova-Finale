@@ -1,5 +1,7 @@
 function [dv1, dv2, dv3, thf, dt] = biElliptic (ai, ei, af, ef, rb, thm)
 
+thm = deg2rad(thm);
+
 mu = 398600;
 
 if thm == 0
@@ -27,5 +29,7 @@ dt1 = pi*sqrt(at1^3/mu);
 dt2 = pi*sqrt(at2^3/mu);
 
 dt = dt1 + dt2;
+
+thf = rad2deg(thf);
 
 end

@@ -1,5 +1,7 @@
 function addPlotOrbit(kepEl, mu, stepTh)
 
+stepTh = deg2rad(stepTh);
+
 a = kepEl(1);
 e = kepEl(2);
 i = kepEl(3);
@@ -9,7 +11,7 @@ th0 = kepEl(6);
 
 [r0, ~] = kep2car (a, e, i, OM, om, th0, mu);
 
-th = 0:stepTh:2*pi;
+th = 0:stepTh:360;
 
 r = zeros(3, length(th));
 
@@ -23,3 +25,5 @@ Z = r(3, :);
 
 plot3(X, Y, Z, 'LineWidth', 1)
 plot3(r0(1), r0(2), r0(3),'xr', 'LineWidth', 1)
+
+end

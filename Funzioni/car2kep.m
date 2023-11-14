@@ -1,27 +1,5 @@
 function [a, e, i, OM, om, th] = car2kep (r, v, mu)
 
-% car2kep.m - Conversion from Cartesian coordinates to Keplerian elements
-%
-% PROTOTYPE:
-% [a, e, i, OM, om, th] = car2kep(r, v, mu)
-%
-% DESCRIPTION:
-% Conversion from Cartesian coordinates to Keplerian elements. Angles in
-% radians.
-%
-% INPUT:
-% r [3x1] Position vector [km]
-% v [3x1] Velocity vector [km/s]
-% mu [1x1] Gravitational parameter [km^3/s^2]
-%
-% OUTPUT:
-% a [1x1] Semi-major axis [km]
-% e [1x1] Eccentricity [-]
-% i [1x1] Inclination [rad]
-% OM [1x1] RAAN [rad]
-% om [1x1] Pericentre anomaly [rad]
-% th [1x1] True anomaly [rad]
-
 I = [1; 0; 0];
 % J = [0; 1; 0];
 K = [0; 0; 1];
@@ -60,7 +38,9 @@ elseif vrad < 0
     th = 2*pi - acos(dot(evect, r)/(e*norm(r)));
 end
 
-% i = rad2deg(i);
-% OM = rad2deg(OM);
-% om = rad2deg(om);
-% th = rad2deg(th);
+i = rad2deg(i);
+OM = rad2deg(OM);
+om = rad2deg(om);
+th = rad2deg(th);
+
+end

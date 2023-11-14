@@ -1,5 +1,12 @@
 function [dv, wf, thf, dt] = changeOrbPlane (a, e, iin, Wi, wi, ifin, Wf, thi)
 
+iin = deg2rad(iin);
+Wi = deg2rad(Wi);
+wi = deg2rad(wi);
+ifin = deg2rad(ifin);
+Wf = deg2rad(Wf);
+thi = deg2rad(thi);
+
 mu = 398600;
 
 dW = Wf - Wi;
@@ -90,3 +97,8 @@ dv = 2*sqrt(mu/p)*(1+e*cos(thm))*sin(alpha/2);
 dt = flightTime (a, e, thi, thm);
 
 thf = thm;
+
+wf = rad2deg(wf);
+thf = rad2deg(thf);
+
+end

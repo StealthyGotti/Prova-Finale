@@ -1,31 +1,9 @@
 function [r, v] = kep2car (a, e, i, OM, om, th, mu)
 
-% kep2car.m - Conversion from Keplerian elements to Cartesian coordinates
-%
-% PROTOTYPE:
-% [r, v] = kep2car(a, e, i, OM, om, th, mu)
-%
-% DESCRIPTION:
-% Conversion from Keplerian elements to Cartesian coordinates. Angles in
-% radians.
-%
-% INPUT:
-% a [1x1] Semi-major axis [km]
-% e [1x1] Eccentricity [-]
-% i [1x1] Inclination [rad]
-% OM [1x1] RAAN [rad]
-% om [1x1] Pericentre anomaly [rad]
-% th [1x1] True anomaly [rad]
-% mu [1x1] Gravitational parameter [km^3/s^2]
-%
-% OUTPUT:
-% r [3x1] Position vector [km]
-% v [3x1] Velocity vector [km/s]
-
-% i = deg2rad(i);
-% OM = deg2rad(OM);
-% om = deg2rad(om);
-% th = deg2rad(th);
+i = deg2rad(i);
+OM = deg2rad(OM);
+om = deg2rad(om);
+th = deg2rad(th);
 
 p = a*(1-e^2);
 r = p/(1+e*cos(th));
@@ -62,3 +40,5 @@ vx = vel(1);
 vy = vel(2);
 vz = vel(3);
 v = [vx; vy; vz];
+
+end
