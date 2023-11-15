@@ -25,8 +25,6 @@ addPlotOrbit(kepElf, mu, 1)
 % Attesa fino al punto di manovra, seguito da un cambio di piano
 % Più si è distanti dal fuoco e meno costa --> punto di manovra == apocentro
 
-dt_1 = flightTime( kepEli(1) , kepEli(2) , kepEli(6) , 180);    %t per arrivare in apocentro
-
 [dv, wf, thf, dt] = changeOrbPlane (kepEli(1), kepEli(2), kepEli(3), kepEli(4), kepEli(5), ...
                         kepElf(3), kepElf(4), kepEli(6));
-fprintf( '\n dv: %.4f \ndt: %.2f\n' , dv , dt+dt_1)
+fprintf( '\n dv: %.4f \ndt: %.2f\n' , dv , dt)
