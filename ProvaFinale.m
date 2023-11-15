@@ -21,10 +21,17 @@ addPlotOrbit(kepElf, mu, 1)
 %   (tutti i parametri cambiano, maremma caleidoscopica)
 % - sapere come consegnare codici Matlab®
 
+%% Manovra standard
 % Posizione iniziale - caratterizzata 
 % Attesa fino al punto di manovra, seguito da un cambio di piano
 % Più si è distanti dal fuoco e meno costa --> punto di manovra == apocentro
 
-[dv, wf, thf, dt] = changeOrbPlane (kepEli(1), kepEli(2), kepEli(3), kepEli(4), kepEli(5), ...
+[dv_1, wi_1, thf, dt_1] = changeOrbPlane (kepEli(1), kepEli(2), kepEli(3), kepEli(4), kepEli(5), ...
                         kepElf(3), kepElf(4), kepEli(6));
-fprintf( '\n dv: %.4f \ndt: %.2f\n' , dv , dt)
+fprintf( '\n dv_1: %.4f \n dt_1: %.2f\n' , dv_1 , dt_1)
+
+% Attesa fino al punto di manovra, cambio di anomalia del pericentro
+[dv_2, thf, dt_2] = changePerArg ( kepEli(1), kepEli(2), wi_1 , kepElf(5) , thf);
+fprintf( '\n dv_2: %.4f \n dt_2: %.2f\n' , dv_2 , dt_2)
+
+% Attesa fino al punto di manovra, cambio di forma dell'orbita
