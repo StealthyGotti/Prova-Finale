@@ -1,0 +1,13 @@
+Cambiamenti da fare: - piano (manovre possbili: 1 in 2 punti)
+                     - forma (manovre possbili: ?) 
+                     - rotazione asse a (manovra possibile: 1)
+
+Piano:
+Il primo punto possibile per il cambio piano e' molto vicino al rilascio --> tempo molto basso
+
+
+Forma:
+Sappiamo che in generale conviene all'apogeo
+
+Rotazione a (w):
+Abbiamo visto una manovra e quella è, va fatta al punto di incontro tra le due orbite dopo che hanno la stessa forma (Manovra secante)
