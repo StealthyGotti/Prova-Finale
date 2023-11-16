@@ -42,3 +42,31 @@ fprintf( '\n dt_23: %.2f\n' , dt_23)         % tempo per arrivare all'apogeo
 [dvi, dvf, thf, dt_3] = biTangent (kepEli(1) , kepEli(2), kepElf(1) , kepElf(2), 180);
 dv_3 = dvi + dvf;
 fprintf( '\n dv_3: %.4f \n dt_3: %.2f\n' , dv_3 , dt_3)
+
+% Manovra biellittica
+raf = kepElf(1)*(1+kepElf(2));
+dv_vect = [];
+dt_3b_vect = [];
+rb = 1*raf ;
+
+for i = 1 : length(rb)
+    [dv1, dv2, dv3, thf, dt_3b] = biElliptic (kepEli(1) , kepEli(2), ...
+                                kepElf(1) , kepElf(2), rb(i), 180);
+    dv_vect = [ dv_vect ; dv1+dv2+dv3];
+    dt_3b_vect = [ dt_3b_vect ; dt_3b ];
+end
+figure
+plot( rb , dv_vect )
+xlabel ('rb')
+ylabel( 'dv')
+figure
+plot( rb , dt_3b_vect )
+xlabel ('rb')
+ylabel( 'dt')
+
+for i = 1 : length(dv_vect)
+    if dv_vect(i) <= dv_3
+        disp('Vantaggioso')
+    end
+end
+
