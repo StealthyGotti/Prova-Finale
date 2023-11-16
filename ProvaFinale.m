@@ -35,3 +35,10 @@ fprintf( '\n dv_1: %.4f \n dt_1: %.2f\n' , dv_1 , dt_1)
 fprintf( '\n dv_2: %.4f \n dt_2: %.2f\n' , dv_2 , dt_2)
 
 % Attesa fino al punto di manovra, cambio di forma dell'orbita
+dt_23 = flightTime( kepEli(1) , kepEli(2) , thf , 180);
+fprintf( '\n dt_23: %.2f\n' , dt_23)         % tempo per arrivare all'apogeo
+
+% Manovra bitangente
+[dvi, dvf, thf, dt_3] = biTangent (kepEli(1) , kepEli(2), kepElf(1) , kepElf(2), 180);
+dv_3 = dvi + dvf;
+fprintf( '\n dv_3: %.4f \n dt_3: %.2f\n' , dv_3 , dt_3)
