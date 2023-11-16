@@ -13,13 +13,13 @@ elseif thm == pi
     r2 = af*(1-ef);
     thf = 0;
 else
-    error('Inserire solo punti absidali come anomalia di manovra')
+    error('Only enter absidal points as maneuvering anomaly')
 end
 
 at = (r1+r2)/2;
 
-dvi = abs(sqrt(2*mu*(1/r1-1/2*at)) - sqrt(2*mu*(1/r1-1/2*ai)));
-dvf = abs(sqrt(2*mu*(1/r2-1/2*af)) - sqrt(2*mu*(1/r2-1/2*at)));
+dvi = abs(sqrt(2*mu*(1/r1-1/(2*at))) - sqrt(2*mu*(1/r1-1/(2*ai))));
+dvf = abs(sqrt(2*mu*(1/r2-1/(2*af))) - sqrt(2*mu*(1/r2-1/(2*at))));
 
 dt = pi*sqrt(at^3/mu);
 

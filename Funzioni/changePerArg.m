@@ -31,10 +31,10 @@ end
 p = a*(1-e^2);
 dv = 2*sqrt(mu/p)*e*sin(abs(thm));
 
-dt = flightTime (a, e, thi, thm);
+dt = flightTime (a, e, rad2deg(thi), rad2deg(thm));
 
 thf = thm + dw;
-if thf < 2*pi
+if thf >= 2*pi
     thf = thf - 2*pi;
 end
 
