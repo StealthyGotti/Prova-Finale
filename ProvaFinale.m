@@ -20,3 +20,53 @@ addPlotOrbit(kepElf, mu, 1)
 % - buttare giù lista di possibili sequenze di manovre
 %   (tutti i parametri cambiano, maremma caleidoscopica)
 % - sapere come consegnare codici Matlab®
+
+%% Manovra standard
+% Posizione iniziale - caratterizzata 
+% Attesa fino al punto di manovra, seguito da un cambio di piano
+% Più si è distanti dal fuoco e meno costa --> punto di manovra == apocentro
+
+[dv_1, wi_1, thf, dt_1] = changeOrbPlane (kepEli(1), kepEli(2), kepEli(3), kepEli(4), kepEli(5), ...
+                        kepElf(3), kepElf(4), kepEli(6));
+fprintf( '\n dv_1: %.4f \n dt_1: %.2f\n' , dv_1 , dt_1)
+
+% Attesa fino al punto di manovra, cambio di anomalia del pericentro
+[dv_2, thf, dt_2] = changePerArg ( kepEli(1), kepEli(2), wi_1 , kepElf(5) , thf);
+fprintf( '\n dv_2: %.4f \n dt_2: %.2f\n' , dv_2 , dt_2)
+
+% Attesa fino al punto di manovra, cambio di forma dell'orbita
+dt_23 = flightTime( kepEli(1) , kepEli(2) , thf , 180);
+fprintf( '\n dt_23: %.2f\n' , dt_23)         % tempo per arrivare all'apogeo
+
+% Manovra bitangente
+[dvi, dvf, thf, dt_3] = biTangent (kepEli(1) , kepEli(2), kepElf(1) , kepElf(2), 180);
+dv_3 = dvi + dvf;
+fprintf( '\n dv_3: %.4f \n dt_3: %.2f\n' , dv_3 , dt_3)
+
+% Manovra biellittica
+raf = kepElf(1)*(1+kepElf(2));
+dv_vect = [];
+dt_3b_vect = [];
+rb = 1*raf ;
+
+for i = 1 : length(rb)
+    [dv1, dv2, dv3, thf, dt_3b] = biElliptic (kepEli(1) , kepEli(2), ...
+                                kepElf(1) , kepElf(2), rb(i), 180);
+    dv_vect = [ dv_vect ; dv1+dv2+dv3];
+    dt_3b_vect = [ dt_3b_vect ; dt_3b ];
+end
+figure
+plot( rb , dv_vect )
+xlabel ('rb')
+ylabel( 'dv')
+figure
+plot( rb , dt_3b_vect )
+xlabel ('rb')
+ylabel( 'dt')
+
+for i = 1 : length(dv_vect)
+    if dv_vect(i) <= dv_3
+        disp('Vantaggioso')
+    end
+end
+
