@@ -1,4 +1,4 @@
-function [dvi, dvf, thf, dt] = biTangent (ai, ei, af, ef, thm)
+function [dvi, dvf, thf, dt, at, et] = biTangent (ai, ei, af, ef, thm)
 
 thm = deg2rad(thm);
 
@@ -17,6 +17,7 @@ else
 end
 
 at = (r1+r2)/2;
+et = abs(r2-r1)/(r2+r1);
 
 dvi = abs(sqrt(2*mu*(1/r1-1/(2*at))) - sqrt(2*mu*(1/r1-1/(2*ai))));
 dvf = abs(sqrt(2*mu*(1/r2-1/(2*af))) - sqrt(2*mu*(1/r2-1/(2*at))));

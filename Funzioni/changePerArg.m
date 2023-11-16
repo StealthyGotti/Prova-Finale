@@ -1,4 +1,4 @@
-function [dv, thf, dt] = changePerArg (a, e, wi, wf, thi)
+function [dv, thm ,thf, dt] = changePerArg (a, e, wi, wf, thi)
 
 wi = deg2rad(wi);
 wf = deg2rad(wf);
@@ -33,11 +33,12 @@ dv = 2*sqrt(mu/p)*e*sin(abs(thm));
 
 dt = flightTime (a, e, rad2deg(thi), rad2deg(thm));
 
-thf = thm + dw;
-if thf >= 2*pi
-    thf = thf - 2*pi;
+thf = thm - dw;
+if thf < 2*pi
+    thf = 2*pi + thf;
 end
 
+thm = rad2deg(thm);
 thf = rad2deg(thf);
 
 end
