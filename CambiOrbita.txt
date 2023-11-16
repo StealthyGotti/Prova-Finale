@@ -11,3 +11,14 @@ Sappiamo che in generale conviene all'apogeo
 
 Rotazione a (w):
 Abbiamo visto una manovra e quella è, va fatta al punto di incontro tra le due orbite dopo che hanno la stessa forma (Manovra secante)
+
+1: cambio piano
+2: cambio argomento pericentro
+3: cambio forma
+
+123
+132
+213
+231
+312
+321
