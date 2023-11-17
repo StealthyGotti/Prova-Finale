@@ -65,6 +65,51 @@ plotOrbitQuiver([at et kepElf(3) kepElf(4) kepElf(5) 180], mu, 20, 0)
 % Attesa fino al punto finale
 plotOrbitQuiver([kepElf(1) kepElf(2) kepElf(3) kepElf(4) kepElf(5) 0], mu, 5, kepElf(6))
 
+% % Manovra biellittica
+% rpf = kepElf(1)*(1-kepElf(2));
+% dv_vect = [];
+% dt3_biell_vect = [];
+% rb = 8000:.01:9000;      % isolato a due estremi vicini al punto di interesse per avere una maggiore accuratezza
+% 
+% for i = 1 : length(rb)
+%     [dv1, dv2, dv3, thf, dt3_biell] = biElliptic (kepEli(1) , kepEli(2), ...
+%                                 kepElf(1) , kepElf(2), rb(i), 180);
+%     dv_vect = [ dv_vect ; dv1+dv2+dv3];
+%     dt3_biell_vect = [ dt3_biell_vect ; dt3_biell ];
+% end
+% rt = 6378;     % Raggio terrestre in km
+% 
+% figure
+% plot( rb , dt3_biell_vect )
+% xlabel ('rb')
+% ylabel( 'dt')
+% 
+% dv_vant = 0;      % Creazione di una variabile che conterrà il dv più vantaggioso possibile
+% for i = 1 : length(dv_vect)
+%     if (dv_vect(i) < dv3) && (rb(i) > rt+100)
+%         % disp('Vantaggioso e raggio ammissibile ')
+%         if dv_vant == 0
+%             dv_vant = dv_vect(i);
+%             rb_vant = rb(i);
+%         elseif dv_vect(i) < dv_vant
+%             dv_vant = dv_vect(i);
+%             rb_vant = rb(i);
+%             i_vant = i;
+%         end
+%     end
+% end
+% 
+% figure
+% plot( rb , dv_vect )
+% xlabel ('rb')
+% ylabel( 'dv')
+% yline( dv3 , '--k')
+% xline ( rt+100 , '--k')
+% yline( dv_vant , '--r')
+% % OSSERVAZIONI:
+% % Biellittica dv di poco vantaggioso per certi valori di rb, ma svantaggiosa 
+% % per il tempo (differenza di circa 6154s)
+
 % Tiro delle somme
 dvstd = dv1 + dv2 + dv3;
 fprintf('%cv complessivo procedura standard: %.2f km/s\n', 916, dvstd)
