@@ -64,7 +64,7 @@ om_f = kepElf(5);
 theta_f = kepElf(6);
 
 om_st = om_f - (144.12175 - om_f); % anomalia del perigeo "strategico", il quale permette di ottenere
-...in seguito al cambio di piano (nel seguente punto di manovra) l'anomalia di perigeo richiesta per l'orbita finale.
+...in seguito al cambio di piano (nel corrispettivo punto di manovra) l'anomalia di perigeo richiesta per l'orbita finale.
 
 % CAMBIO ANOMALIA
 [dv_1, thm ,thf1, dt_1 ] = changePerArg (a_i, e_i, om_i , om_st , th_i);
