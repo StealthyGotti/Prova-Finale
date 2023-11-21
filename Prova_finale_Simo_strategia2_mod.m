@@ -39,25 +39,9 @@ plot3(p2(1), p2(2), p2(3), 'k.', 'MarkerSize', 30);
 
 %% PLOT ANIMATI
 
-% Orbita iniziale
-r0 = [-8205.9652; -4682.7991; 2382.4314];
-v0 = [1.8330; -5.5360; -2.2630];
-mu = 398600;
-%[a_i, e_i , i_i , OM_i , om_i , th_i] = car2kep_simo(r0, v0, mu);
-
 %[X_i , Y_i , Z_i] = plotOrbit_correct_Simo(a_i , e_i , i_i , OM_i , om_i , mu , 1);
 
-
-% Orbita finale
-% a_f = 11860;
-% e_f = 0.2614; 
-% i_f = 0.5352;
-% OM_f = 0.8005; 
-% om_f = 2.3120; 
-% theta_f = 0.9719;
-
 %[X_f , Y_f , Z_f] = plotOrbit_correct_Simo(a_f , e_f , i_f , OM_f , om_f , mu , 1);
-
 
 %% MAVORA APF
 
@@ -130,10 +114,15 @@ plot3(r0(1), r0(2), r0(3), 'o', 'MarkerSize', 10, 'MarkerEdgeColor', 'r', 'LineW
 plotOrbit(kepElf, mu, .1)
 plot3(rf(1), rf(2), rf(3), 'x', 'MarkerSize', 15, 'MarkerEdgeColor', 'r', 'LineWidth', 3);
 
-title('Strategia 2')
+title('Trasferimento APF')
 
 %% COSTO TOTALE E TEMPO DI TRASFERIMENTO DELLA MISSIONE
 
-dv_TOT = abs(dv_1) + abs(dv_2) + abs(delta_v31)   % 2.3491 km/s
-dt_TOT_sec = dt_1 + dt2 + dt3 + delta_t41 + dt5 % 10335 sec
-dt_TOT_ore = (dt_1 + dt2 + dt3 + delta_t41 + dt5)/3600 % 2.8706 ore ~= 2 ore e 52 minuti
+dv_TOT = abs(dv_1) + abs(dv_2) + abs(delta_v31);   % 2.3491 km/s
+dt_TOT_sec = dt_1 + dt2 + dt3 + delta_t41 + dt5; % 10335 sec
+dt_TOT_ore = (dt_1 + dt2 + dt3 + delta_t41 + dt5)/3600; % 2.8706 ore ~= 2 ore e 52 minuti
+
+fprintf('Costo totale della misione (km/s): [%.4f]\n', dv_TOT )
+
+fprintf('Tempo totale di trasferimento con manovra AFP (sec): [%.0f]\n', dt_TOT_sec )
+fprintf('Tempo totale di trasferimento con manovra AFP (ore): [%.4f]\n', dt_TOT_ore )
