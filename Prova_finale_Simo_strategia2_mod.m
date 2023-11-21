@@ -1,5 +1,5 @@
 % Prova finale (Simo)
-% STRATEGIA 2
+% STRATEGIA 2: MANOVRA APF
 clear;
 close all;
 
