@@ -75,6 +75,53 @@ plotOrbitQuiver([kepEli(1) kepEli(2) kepElf(3) kepElf(4) kepElf(5) th3], mu, 10,
 dv3 = dvi + dvf;
 plotOrbitQuiver([at et kepElf(3) kepElf(4) kepElf(5) 180], mu, 10, 0)
 
+% Esclusione manovra biellittica
+%{
+% % Manovra biellittica
+% rpf = kepElf(1)*(1-kepElf(2));
+% dv_vect = [];
+% dt_3b_vect = [];
+% rb = 8000:.01:9000;
+% 
+% for i = 1 : length(rb)
+%     [dv1, dv2, dv3, thf, dt_3b] = biElliptic (kepEli(1) , kepEli(2), ...
+%                                 kepElf(1) , kepElf(2), rb(i), 180);
+%     dv_vect = [ dv_vect ; dv1+dv2+dv3];
+%     dt_3b_vect = [ dt_3b_vect ; dt_3b ];
+% end
+% rt = 6378;
+% 
+% figure
+% plot( rb , dt_3b_vect )
+% xlabel ('rb')
+% ylabel( 'dt')
+% 
+% dv_vant = 0;
+% for i = 1 : length(dv_vect)
+%     if (dv_vect(i) < dv_3) && (rb(i) > rt+100)
+%         % disp('Vantaggioso e raggio ammissibile ')
+%         if dv_vant == 0
+%             dv_vant = dv_vect(i);
+%             rb_vant = rb(i);
+%         elseif dv_vect(i) < dv_vant
+%             dv_vant = dv_vect(i);
+%             rb_vant = rb(i);
+%             i_vant = i;
+%         end
+%     end
+% end
+% 
+% figure
+% plot( rb , dv_vect )
+% xlabel ('rb')
+% ylabel( 'dv')
+% yline( dv_3 , '--k')
+% xline ( rt+100 , '--k')
+% yline( dv_vant , '--r')
+% % Biellittica dv di poco vantaggioso per certi valori di rb, ma svantaggiosa 
+% % per il tempo (differenza di circa 6154s)
+%}
+
 % Attesa fino al punto finale
 plotOrbitQuiver([kepElf(1) kepElf(2) kepElf(3) kepElf(4) kepElf(5) 0], mu, 10, kepElf(6))
 
