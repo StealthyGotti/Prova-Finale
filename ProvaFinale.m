@@ -233,7 +233,7 @@ dt_TOT_sec = dt_1 + dt2 + dt3 + delta_t41 + dt5;                            % 10
 dt_TOT_ore = (dt_TOT_sec)/3600;                                             % 2.8706 ore ~= 2 ore e 52 minuti
 
 fprintf('%cv complessivo procedura Anomalia-Piano-Forma: %.2f km/s\n', 916, dv_TOT)
-fprintf('%cv complessivo procedura Anomalia-Piano-Forma: %.2f km/s\n', 916, dt_TOT_ore)
+fprintf('%cv complessivo procedura Anomalia-Piano-Forma: %.2f s\n', 916, dt_TOT_sec)
 
 
 
