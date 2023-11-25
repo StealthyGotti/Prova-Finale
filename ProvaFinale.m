@@ -29,9 +29,9 @@ plot3(rf(1), rf(2), rf(3), 'x', 'MarkerSize', 15, 'MarkerEdgeColor', 'r', 'LineW
 
 % Perigees
 [p1, ~] = kep2car(kepEli(1), kepEli(2), kepEli(3), kepEli(4), kepEli(5), 0, mu);
-plot3(p1(1), p1(2), p1(3),  'k.', 'MarkerSize', 30);
+plot3(p1(1), p1(2), p1(3),  'k.', 'MarkerSize', 30)
 [p2, ~] = kep2car(kepElf(1), kepElf(2), kepElf(3), kepElf(4), kepElf(5), 0, mu);
-plot3(p2(1), p2(2), p2(3), 'k.', 'MarkerSize', 30);
+plot3(p2(1), p2(2), p2(3), 'k.', 'MarkerSize', 30)
 
 % Equatorial Plane
 [x, y] = meshgrid(-1.5*10000:50:1.5*10000, -10000*1.5:50:1.5*10000);
@@ -131,8 +131,8 @@ plotOrbitQuiver([kepElf(1) kepElf(2) kepElf(3) kepElf(4) kepElf(5) 0], mu, 10, k
 dvstd = dv1 + dv2 + dv3;
 fprintf('%cv complessivo procedura standard: %.2f km/s\n', 916, dvstd)
 dtstd = dt1 + dt2 + dt23 + dt3;
-[hr, min, sec] = time2esa(dtstd);
-fprintf('%ct complessivo procedura standard: %.0f s = %.0f hr %.0f min %.0f s\n', 916, dtstd, hr, min, sec)
+[h, m, s] = time2esa(dtstd);
+fprintf('%ct complessivo procedura standard: %.0f s = %.0f hr %.0f min %.0f s\n', 916, dtstd, h, m, s)
 
 % Tutte le manovre sono eseguite alla prima posizione utile
 
@@ -150,44 +150,43 @@ title('Strategia standard')
 
 %% MANOVRA BIELLITTICA
 
-% si procede con un'analisi della convenienza al variare del raggio di apocentro della biellittica
+% Si procede con un'analisi della convenienza al variare del raggio di apocentro della biellittica
 
-figure
-hold on
-grid on
-xlabel('X [km]')
-ylabel('Y [km]')
-zlabel('Z [km]')
-set(gca, 'FontSize', 12)
-plot3(r0(1), r0(2), r0(3), 'o', 'MarkerSize', 10, 'MarkerEdgeColor', 'r', 'LineWidth', 3)
-plot3(rf(1), rf(2), rf(3), 'x', 'MarkerSize', 15, 'MarkerEdgeColor', 'r', 'LineWidth', 3)
-pbaspect([1 1 1])
-daspect([1 1 1])
-
-% ESEMPIO (rb = 10000 km, no skip)
-[dvbi, dtbi, kepElt1, kepElt2, thm, thfb, axis] = biEllipticChangeOrb (kepEli, kepElf, 10000);
-plotOrbitQuiver(kepEli, mu, 5, thm)
-plotOrbitQuiver([kepElt1(1) kepElt1(2) kepElt1(3) kepElt1(4) kepElt1(5) 0], mu, 5, 180) 
-plotOrbitQuiver([kepElt2(1) kepElt2(2) kepElt2(3) kepElt2(4) kepElt2(5) 0], mu, 5, 180)
-plotOrbitQuiver([kepElf(1) kepElf(2) kepElf(3) kepElf(4) kepElf(5) thfb], mu, 5, kepElf(6))
-% plotOrbit(kepEli, mu, .1)
-% plotOrbit(kepElt1, mu, .1)
-% plotOrbit(kepElt2, mu, .1)
-% plotOrbit(kepElf, mu, .1)
-plot3(1e4*[-axis(1) axis(1)], 1e4*[-axis(2) axis(2)], 1e4*[-axis(3) axis(3)], 'k--')
-Terra3d
-
-fprintf('%cv complessivo procedura biellittica: %.2f km/s\n', 916, dvbi)
-[hr, min, sec] = time2esa(dtbi);
-fprintf('%ct complessivo procedura biellittica: %.0f s = %.0f hr %.0f min %.0f s\n', 916, dtbi, hr, min, sec)
-
-legend('Init Pos', 'Fin Pos', 'Orb Init', 'First Arch', 'Second Arch', 'Orb Fin', 'Man Axis')
-title('Strategia biellittica')
-
+% Non-skip try
 rbmin = 7000;
 rbmax = 100000;
 dvb = zeros(1,length(rbmin:100:rbmax));
 dtb = zeros(1,length(rbmin:100:rbmax));
+j = 1;
+for rb = rbmin : 100 : rbmax
+    [dv, dt] = biEllipticChangeOrb (kepEli, kepElf, rb);
+    dvb(j) = dv;
+    dtb(j) = dt;
+    j = j+1;
+end
+rb = rbmin : 100 : rbmax;
+figure
+set(gca, 'FontSize', 12)
+plot(rb, dvb)
+xlabel('rb [km]')
+ylabel('dv [km/s]')
+title('Velocity (no skip)')
+grid on
+figure
+set(gca, 'FontSize', 12)
+plot(rb, dtb/3600)
+xlabel('rb [km]')
+ylabel('dt [hr]')
+title('Time (no skip)')
+grid on
+dvbest = min(dvb);
+pos = find(dvb==dvbest);
+rbbest = rb(pos);
+reltime = dtb(pos);
+[h, m, s] = time2esa (reltime);
+fprintf('Situazione più conveniente al primo punto di manovra biellittica disponibile:\nrb = %d km | %cv = %.2f km/s | %ct = %d h %d m %.0f s\n', rbbest, 916, dvbest, 916, h, m, s)
+
+% Skip try
 j = 1;
 for rb = rbmin : 100 : rbmax
     [dv, dt] = biEllipticChangeOrb (kepEli, kepElf, rb, 'skip');
@@ -201,15 +200,48 @@ set(gca, 'FontSize', 12)
 plot(rb, dvb)
 xlabel('rb [km]')
 ylabel('dv [km/s]')
-title('Velocity')
+title('Velocity (skip)')
 grid on
 figure
 set(gca, 'FontSize', 12)
 plot(rb, dtb/3600)
 xlabel('rb [km]')
 ylabel('dt [hr]')
-title('Time')
+title('Time (skip)')
 grid on
+dvbest = min(dvb);
+pos = find(dvb==dvbest);
+rbbest = rb(pos);
+reltime = dtb(pos);
+[h, m, s] = time2esa (reltime);
+fprintf('Situazione più conveniente al secondo punto di manovra biellittica disponibile:\nrb = %d km | %cv = %.2f km/s | %ct = %d h %d m %.0f s\n', rbbest, 916, dvbest, 916, h, m, s)
+
+% Rappresentazione manovra più conveniente in assoluto
+figure
+hold on
+grid on
+xlabel('X [km]')
+ylabel('Y [km]')
+zlabel('Z [km]')
+set(gca, 'FontSize', 12)
+plot3(r0(1), r0(2), r0(3), 'o', 'MarkerSize', 10, 'MarkerEdgeColor', 'r', 'LineWidth', 3)
+plot3(rf(1), rf(2), rf(3), 'x', 'MarkerSize', 15, 'MarkerEdgeColor', 'r', 'LineWidth', 3)
+pbaspect([1 1 1])
+daspect([1 1 1])
+[dvbi, dtbi, kepElt1, kepElt2, thm, thfb, axis] = biEllipticChangeOrb (kepEli, kepElf, 14000, 'skip');
+plotOrbitQuiver(kepEli, mu, 5, thm)
+plotOrbitQuiver([kepElt1(1) kepElt1(2) kepElt1(3) kepElt1(4) kepElt1(5) 0], mu, 5, 180) 
+plotOrbitQuiver([kepElt2(1) kepElt2(2) kepElt2(3) kepElt2(4) kepElt2(5) 180], mu, 5, 360)
+plotOrbitQuiver([kepElf(1) kepElf(2) kepElf(3) kepElf(4) kepElf(5) thfb], mu, 5, kepElf(6))
+% plotOrbit(kepEli, mu, .1)
+% plotOrbit(kepElt1, mu, .1)
+% plotOrbit(kepElt2, mu, .1)
+% plotOrbit(kepElf, mu, .1)
+plot3(1e4*[-axis(1) axis(1)], 1e4*[-axis(2) axis(2)], 1e4*[-axis(3) axis(3)], 'k--')
+Terra3d
+
+legend('Init Pos', 'Fin Pos', 'Orb Init', 'First Arch', 'Second Arch', 'Orb Fin', 'Man Axis')
+title('Strategia biellittica')
 
 % DA VERIFICARE MEGLIO (OCCHIO)
 % valore minimo senza skip (prima manovra disponibile): 2.02 km/s @ 9300 km
