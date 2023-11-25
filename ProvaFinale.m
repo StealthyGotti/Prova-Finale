@@ -152,7 +152,7 @@ title('Strategia standard')
 
 % Si procede con un'analisi della convenienza al variare del raggio di apocentro della biellittica
 
-% Non-skip try
+% Non-skip trials
 rbmin = 7000;
 rbmax = 100000;
 dvb = zeros(1,length(rbmin:100:rbmax));
@@ -186,7 +186,7 @@ reltime = dtb(pos);
 [h, m, s] = time2esa (reltime);
 fprintf('Situazione più conveniente al primo punto di manovra biellittica disponibile:\nrb = %d km | %cv = %.2f km/s | %ct = %d h %d m %.0f s\n', rbbest, 916, dvbest, 916, h, m, s)
 
-% Skip try
+% Skip trials
 j = 1;
 for rb = rbmin : 100 : rbmax
     [dv, dt] = biEllipticChangeOrb (kepEli, kepElf, rb, 'skip');
@@ -246,3 +246,67 @@ title('Strategia biellittica')
 % DA VERIFICARE MEGLIO (OCCHIO)
 % valore minimo senza skip (prima manovra disponibile): 2.02 km/s @ 9300 km
 % valore minimo con skip (seconda manovra disponibile): 1.75 km/s @ 14000 km
+
+%% MANOVRA DIRETTA
+
+figure
+hold on
+grid on
+xlabel('X [km]')
+ylabel('Y [km]')
+zlabel('Z [km]')
+set(gca, 'FontSize', 12)
+plot3(r0(1), r0(2), r0(3), 'o', 'MarkerSize', 10, 'MarkerEdgeColor', 'r', 'LineWidth', 3)
+plot3(rf(1), rf(2), rf(3), 'x', 'MarkerSize', 15, 'MarkerEdgeColor', 'r', 'LineWidth', 3)
+pbaspect([1 1 1])
+daspect([1 1 1])
+
+thm1 = kepEli(6); % da quale anomalia dell'orbita iniziale si vuole partire (default = kepEli(6), pos init)
+thm2 = kepElf(6); % a quale anomalia vera dell'orbita finale si vuole arrivare (default = kepElf(6), pos fin)
+et = .5; % quale eccentricità si vuole che l'orbita di trasferimento abbia
+[dvdir, dtdir, kepElt, th2t, r1, r2, v1, vt1, vt2, v2, dt0, dt1, dt2] = directOrb (kepEli, kepElf, et, thm1, thm2);
+
+%[dv, dt, kepElt, th2t] = directOrb (kepEli, kepElf, kepEli(6), kepElf(6), 0);
+%plotOrbit(kepEli, mu, .1)
+%plotOrbit(kepElt, mu, .1)
+%plotOrbit(kepElf, mu, .1)
+plotOrbitQuiver(kepEli, mu, 5, thm1)
+plotOrbitQuiver(kepElt, mu, 5, th2t)
+plotOrbitQuiver([kepElf(1) kepElf(2) kepElf(3) kepElf(4) kepElf(5) thm2], mu, 5, kepElf(6))
+
+% Info su velocità
+quiver3(r1(1),r1(2),r1(3),1e3*v1(1),1e3*v1(2),1e3*v1(3))
+quiver3(r1(1),r1(2),r1(3),1e3*vt1(1),1e3*vt1(2),1e3*vt1(3))
+quiver3(r2(1),r2(2),r2(3),1e3*vt2(1),1e3*vt2(2),1e3*vt2(3))
+quiver3(r2(1),r2(2),r2(3),1e3*v2(1),1e3*v2(2),1e3*v2(3))
+
+Terra3d
+legend('Init Pos', 'Fin Pos', 'Orb Init', 'Orb Trans', 'Orb Fin', '1e3*v1', '1e3*vt1', '1e3*vt2', '1e3*v2')
+title('Direct transfer')
+
+[h, m, s] = time2esa (dtdir);
+fprintf('%cv complessivo manovra diretta: %.2f km/s\n', 916, dvdir)
+fprintf('%ct complessivo manovra diretta: %.0f s = %.0f hr %.0f min %.0f s\n', 916, dtdir, h, m, s)
+
+% Trials
+dvdirvect = zeros(length(0.01:0.01:0.99), 1);
+dtdirvect = zeros(length(0.01:0.01:0.99), 1);
+for et = 0.01:0.01:0.99
+    [dvdir, dtdir] = directOrb (kepEli, kepElf, et, thm1, thm2);
+    dvdirvect(round(100*et)) = dvdir;
+    dtdirvect(round(100*et)) = dtdir;
+end
+et = 0.01:0.01:0.9999;
+
+figure
+hold on
+grid on
+xlabel('eccentricity')
+% ylabel('dv [km/s] / dt [min]')
+set(gca, 'FontSize', 12)
+plot(et(~isnan(dtdirvect)), dvdirvect(~isnan(dtdirvect)), et(~isnan(dtdirvect)), dtdirvect(~isnan(dtdirvect))/60)
+ylim([0 60])
+legend('impulse [km/s]', 'time [min]')
+
+
+% DA VERIFICARE MEGLIO (OCCHIO)
