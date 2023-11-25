@@ -1,5 +1,5 @@
 % Prova finale (Simo)
-% STRATEGIA 4: MANOVRA F1PA
+% STRATEGIA 4: MANOVRA F2PA
 clear;
 close all;
 
@@ -43,9 +43,9 @@ plot3(p2(1), p2(2), p2(3), 'k.', 'MarkerSize', 30);
 
 %[X_f , Y_f , Z_f] = plotOrbit_correct_Simo(a_f , e_f , i_f , OM_f , om_f , mu , 1);
 
-%% MAVORA F1PA
+%% MAVORA F2PA
 
-% cambio forma (1) -> cambio piano  -> cambio anomalia
+% cambio forma (2) -> cambio piano  -> cambio anomalia
 
 a_i = kepEli(1);
 e_i = kepEli(2); 
@@ -61,26 +61,24 @@ OM_f = kepElf(4);
 om_f = kepElf(5); 
 theta_f = kepElf(6);
 
-plotOrbitQuiver([a_i , e_i , i_i , OM_i , om_i , th_i ], mu, 5, 180)  % tratto 1
+plotOrbitQuiver([a_i , e_i , i_i , OM_i , om_i , th_i ], mu, 20, 0)  % tratto 1
 
-% Tempo di trasferimento dal punto di rilascio all'apocentro (dove effettuare il cambio di forma)
-dt1 = flightTime (a_i, e_i, th_i, 180);
+% Tempo di trasferimento dal punto di rilascio al pericentro (dove effettuare il cambio di forma)
+dt1 = flightTime (a_i, e_i, th_i, 0);
 
-hold on
+% CAMBIO FORMA 2 (pericentro orbita iniziale -> apocentro orbita finale)
 
-% CAMBIO FORMA 1  (apocentro orbita iniziale -> pericentro orbita finale)
+[delta_v1 , delta_t2 , a_t , e_t] = changeOrbitShape(a_i , e_i , om_i , a_f , e_f , om_i , 2);
 
-[delta_v1 , delta_t2 , a_t , e_t] = changeOrbitShape(a_i , e_i , om_i , a_f , e_f , om_i , 1);
-
-plotOrbitQuiver([a_t , e_t , i_i , OM_i , om_i , 180 ], mu, 20, 0)  % tratto 2
+plotOrbitQuiver([a_t , e_t , i_i , OM_i , om_i , 0 ], mu, 20, 180)  % tratto 2
 
 hold on
 
 % CAMBIO PIANO
 
-[dv2, wf, thf, dt3] = changeOrbPlane (a_f, e_f, i_i, OM_i, om_i, i_f, OM_f, 0);
+[dv2, wf, thf, dt3] = changeOrbPlane (a_f, e_f, i_i, OM_i, om_i, i_f, OM_f, 180);
 
-plotOrbitQuiver([a_f , e_f , i_i , OM_i , om_i , 0 ], mu, 20, thf)  % tratto 3
+plotOrbitQuiver([a_f , e_f , i_i , OM_i , om_i , 180 ], mu, 10, thf)  % tratto 3
 
 hold on
 
@@ -100,16 +98,17 @@ dt5 = flightTime (a_f, e_f, thf1 , theta_f);
 
 Terra3d
 
-title('Trasferimento F1PA')
+title('Trasferimento F2PA')
 
 %% COSTO TOTALE E TEMPO DI TRASFERIMENTO DELLA MISSIONE
 
-dv_TOT = abs(delta_v1) + abs(dv2) + abs(dv3);   % 3.6834 km/s  % più costoso rispetto a APF e AFP
-dt_TOT_sec = dt1 + delta_t2 + dt3 + dt4 + dt5; % 22392 sec
-dt_TOT_ore = (dt1 + delta_t2 + dt3 + dt4 + dt5)/3600; % 6.2200 ore ~= 6 ore e 22 minuti   % leggermente più veloce di AFP
+dv_TOT = abs(delta_v1) + abs(dv2) + abs(dv3);   % 3.6770 km/s  % più costoso rispetto a APF e AFP, ma leggermente meno costoso di F1PA
+dt_TOT_sec = dt1 + delta_t2 + dt3 + dt4 + dt5; % 22119 sec
+dt_TOT_ore = (dt1 + delta_t2 + dt3 + dt4 + dt5)/3600; % 6.1442 ore ~= 6 ore e 9 minuti   % leggermente più veloce di AFP e F1PA
 
 fprintf('Costo totale della misione (km/s): [%.4f]\n', dv_TOT )
 
 fprintf('Tempo totale di trasferimento con manovra AFP (sec): [%.0f]\n', dt_TOT_sec )
 fprintf('Tempo totale di trasferimento con manovra AFP (ore): [%.4f]\n', dt_TOT_ore )
 
+% Si può concludere che risulta più vantaggiosa la manovra F2PA anzichè F1PA

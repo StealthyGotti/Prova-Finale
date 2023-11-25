@@ -1,5 +1,5 @@
 % Prova finale (Simo)
-% STRATEGIA 4: MANOVRA F1PA
+% STRATEGIA 6: MANOVRA F1AP
 clear;
 close all;
 
@@ -43,9 +43,9 @@ plot3(p2(1), p2(2), p2(3), 'k.', 'MarkerSize', 30);
 
 %[X_f , Y_f , Z_f] = plotOrbit_correct_Simo(a_f , e_f , i_f , OM_f , om_f , mu , 1);
 
-%% MAVORA F1PA
+%% MAVORA F1AP
 
-% cambio forma (1) -> cambio piano  -> cambio anomalia
+% cambio forma (1) ->  cambio anomalia ->  cambio piano
 
 a_i = kepEli(1);
 e_i = kepEli(2); 
@@ -76,40 +76,41 @@ plotOrbitQuiver([a_t , e_t , i_i , OM_i , om_i , 180 ], mu, 20, 0)  % tratto 2
 
 hold on
 
-% CAMBIO PIANO
-
-[dv2, wf, thf, dt3] = changeOrbPlane (a_f, e_f, i_i, OM_i, om_i, i_f, OM_f, 0);
-
-plotOrbitQuiver([a_f , e_f , i_i , OM_i , om_i , 0 ], mu, 20, thf)  % tratto 3
-
-hold on
-
 % CAMBIO ANOMALIA
-[dv3, thm ,thf1, dt4] = changePerArg (a_f , e_f, wf , om_f , thf);
 
-plotOrbitQuiver([a_f , e_f , i_f , OM_f , wf , thf ], mu, 15, thm)  % tratto 4
+om_st = om_f - (144.12175 - om_f); % anomalia del perigeo "strategico", il quale permette di ottenere
+...in seguito al cambio di piano (nel corrispettivo punto di manovra) l'anomalia di perigeo richiesta per l'orbita finale.
+
+[dv2, thm ,thf1, dt3] = changePerArg (a_f , e_f, om_i , om_st , 0);
+
+plotOrbitQuiver([a_f , e_f , i_i , OM_i , om_i , 0 ], mu, 5, thm)  % tratto 3
 
 hold on
+% CAMBIO PIANO
+[dv3, wf, thf, dt4] = changeOrbPlane (a_f, e_f, i_i, OM_i, om_st, i_f, OM_f, thf1);
 
-plotOrbitQuiver([a_f , e_f , i_f , OM_f , om_f , thf1 ], mu, 10, theta_f)  % tratto 5
+plotOrbitQuiver([a_f , e_f , i_i , OM_i , om_st , thf1 ], mu, 5, thf)  % tratto 4
+
+plotOrbitQuiver([a_f , e_f , i_f , OM_f , wf , thf ], mu, 8 , theta_f)  % tratto 5
+
+% Tempo di trasferimento dal punto di cambio piano al punto di rilascio
+dt5 = flightTime (a_f, e_f, thf , theta_f);
 
 hold on
-
-% Tempo di trasferimento dal punto di cambio di anomalia al punto di rilascio
-dt5 = flightTime (a_f, e_f, thf1 , theta_f);
 
 Terra3d
 
-title('Trasferimento F1PA')
+title('Trasferimento AFP')
 
 %% COSTO TOTALE E TEMPO DI TRASFERIMENTO DELLA MISSIONE
 
-dv_TOT = abs(delta_v1) + abs(dv2) + abs(dv3);   % 3.6834 km/s  % più costoso rispetto a APF e AFP
-dt_TOT_sec = dt1 + delta_t2 + dt3 + dt4 + dt5; % 22392 sec
-dt_TOT_ore = (dt1 + delta_t2 + dt3 + dt4 + dt5)/3600; % 6.2200 ore ~= 6 ore e 22 minuti   % leggermente più veloce di AFP
+dv_TOT = abs(delta_v1) + abs(dv2) + abs(dv3);   % 3.8955 km/s
+dt_TOT_sec = dt1 + delta_t2 + dt3 + dt4 + dt5; % 9538 sec
+dt_TOT_ore = (dt1 + delta_t2 + dt3 + dt4 + dt5)/3600; % 2.6494 ore ~= 2 ore e 39 minuti
 
 fprintf('Costo totale della misione (km/s): [%.4f]\n', dv_TOT )
 
 fprintf('Tempo totale di trasferimento con manovra AFP (sec): [%.0f]\n', dt_TOT_sec )
 fprintf('Tempo totale di trasferimento con manovra AFP (ore): [%.4f]\n', dt_TOT_ore )
+
 
