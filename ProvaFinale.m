@@ -261,10 +261,11 @@ plot3(rf(1), rf(2), rf(3), 'x', 'MarkerSize', 15, 'MarkerEdgeColor', 'r', 'LineW
 pbaspect([1 1 1])
 daspect([1 1 1])
 
+% ESEMPIO
 thm1 = kepEli(6); % da quale anomalia dell'orbita iniziale si vuole partire (default = kepEli(6), pos init)
 thm2 = kepElf(6); % a quale anomalia vera dell'orbita finale si vuole arrivare (default = kepElf(6), pos fin)
-et = .5; % quale eccentricità si vuole che l'orbita di trasferimento abbia
-[dvdir, dtdir, kepElt, th2t, r1, r2, v1, vt1, vt2, v2, dt0, dt1, dt2] = directOrb (kepEli, kepElf, et, thm1, thm2);
+et = .2; % quale eccentricità si vuole che l'orbita di trasferimento abbia
+[dvdir, dtdir, kepElt, th2t, dth, r1, r2, d1, d2, pt, v1, vt1, vt2, v2, dt0, dt1, dt2] = directOrb (kepEli, kepElf, et, thm1, thm2);
 
 %[dv, dt, kepElt, th2t] = directOrb (kepEli, kepElf, kepEli(6), kepElf(6), 0);
 %plotOrbit(kepEli, mu, .1)
@@ -296,17 +297,17 @@ for et = 0.01:0.01:0.99
     dvdirvect(round(100*et)) = dvdir;
     dtdirvect(round(100*et)) = dtdir;
 end
-et = 0.01:0.01:0.9999;
+et = 0.01:0.01:0.99;
 
 figure
 hold on
 grid on
 xlabel('eccentricity')
-% ylabel('dv [km/s] / dt [min]')
+ylabel('dv [km/s] | dt [min]')
 set(gca, 'FontSize', 12)
-plot(et(~isnan(dtdirvect)), dvdirvect(~isnan(dtdirvect)), et(~isnan(dtdirvect)), dtdirvect(~isnan(dtdirvect))/60)
-ylim([0 60])
+plot(et(~isnan(dtdirvect)), dvdirvect(~isnan(dtdirvect)), et(~isnan(dtdirvect)), dtdirvect(~isnan(dtdirvect))/60, LineWidth=1)
 legend('impulse [km/s]', 'time [min]')
+title(sprintf('Direct transfer analysis from %.2f° to %.2f° ', thm1, thm2))
 
 
 % DA VERIFICARE MEGLIO (OCCHIO)
