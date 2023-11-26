@@ -262,9 +262,9 @@ pbaspect([1 1 1])
 daspect([1 1 1])
 
 % ESEMPIO
-thm1 = kepEli(6); % da quale anomalia dell'orbita iniziale si vuole partire (default = kepEli(6), pos init)
-thm2 = kepElf(6); % a quale anomalia vera dell'orbita finale si vuole arrivare (default = kepElf(6), pos fin)
-et = .2; % quale eccentricità si vuole che l'orbita di trasferimento abbia
+thm1 = 130; % da quale anomalia dell'orbita iniziale si vuole partire (default = kepEli(6), pos init)
+thm2 = 50; % a quale anomalia vera dell'orbita finale si vuole arrivare (default = kepElf(6), pos fin)
+et = .9; % quale eccentricità si vuole che l'orbita di trasferimento abbia
 [dvdir, dtdir, kepElt, th2t, dth, r1, r2, d1, d2, pt, v1, vt1, vt2, v2, dt0, dt1, dt2] = directOrb (kepEli, kepElf, et, thm1, thm2);
 
 %[dv, dt, kepElt, th2t] = directOrb (kepEli, kepElf, kepEli(6), kepElf(6), 0);
@@ -309,5 +309,29 @@ plot(et(~isnan(dtdirvect)), dvdirvect(~isnan(dtdirvect)), et(~isnan(dtdirvect)),
 legend('impulse [km/s]', 'time [min]')
 title(sprintf('Direct transfer analysis from %.2f° to %.2f° ', thm1, thm2))
 
+% % prove su coppie di punti di partenza e arrivo a range di eccentricità
+% % analisi a risoluzione: 10° anomalia, 0.1 eccentricità ---> 12960 combinazioni di manovra (runtime: 4 hr +)
+% 
+% counter = 0;
+% for thm1 = 0:10:360
+%     for thm2 = 0:10:360
+%         for et = 0.1:0.1:0.9
+%             [dvdir, dtdir] = directOrb (kepEli, kepElf, et, thm1, thm2);
+%             dvdirvect(round(10*et)) = dvdir;
+%             dtdirvect(round(10*et)) = dtdir;
+%         end
+%         et = 0.1:0.1:0.9;
+%         dvmin = min(dvdirvect);
+%         posv = find(dvdirvect==dvmin);
+%         etv = et(posv);
+%         dtmin = min(dtdirvect);
+%         [hmin, mmin, smin] = time2esa (dtmin);
+%         post = find(dtdirvect==dtmin);
+%         ett = et(post);
+%         fprintf('%c1 = %.2f°, %c2 = %.2f°: %cvmin = %.4f km/s at e = %.4f, %ctmin = %.0f s (%.0f hr %.0f min %.0f s) at e = %.4f\n', 952, thm1, 952, thm2, 916, dvmin, etv, 916, dtmin, hmin, mmin, smin, ett)
+%         counter = counter + 1;
+%     end
+% end
+% fprintf('Numero di manovre analizzate: %d', counter)
 
 % DA VERIFICARE MEGLIO (OCCHIO)
