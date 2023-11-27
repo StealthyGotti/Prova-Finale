@@ -94,8 +94,6 @@ end
 p = a*(1-e^2);
 dv = 2*sqrt(mu/p)*(1+e*cos(thm))*sin(alpha/2);
 
-disp(thi)
-disp(rad2deg(thm))
 dt = flightTime (a, e, rad2deg(thi), rad2deg(thm));
 
 thf = thm;

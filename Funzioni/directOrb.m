@@ -1,4 +1,4 @@
-function [dv, dt, kepElt, th2t, dth, r1, r2, d1, d2, pt, v1, vt1, vt2, v2, dt0, dt1, dt2] = directOrb (kepEli, kepElf, et, thm1, thm2)
+function [dv, dt, kepElt, th2t, dth, r1, r2, d1, d2, pt, v1, vt1, vt2, v2, dt0, dt1, dt2] = directOrb (kepEli, kepElf, et, thm1, thm2, warnings)
 
 mu = 398600;
 Rt = 6378;
@@ -20,6 +20,9 @@ thf = kepElf(6);
 if nargin == 3
     thm1 = thi;
     thm2 = thf;
+end
+if nargin == 5
+    warnings = 'on';
 end
 
 % Data conversion
@@ -58,20 +61,18 @@ elseif dot(r2,j) < 0
     dth = 2*pi - acos(dot(i,r2)/norm(r2));
 end
 if et ~= 0 && d1 ~= d2
-    if et ~= 0 && d1 == d2
-        warning('Eccentricity could be set to 0 as selected maneuvering distances are equal to each other')
+    if et ~= 0 && abs(d1-d2) < 1e-6
+        if strcmp(warnings,'on')
+            warning('Eccentricity could be set to 0 as selected maneuvering distances are equal to each other for %c1 = %.2f°, %c2 = %.2f°, e = %.4f', 952, rad2deg(thm1), 952, rad2deg(thm2), et)
+        end
     end
-    syms th1t th2t pt real
-    var = [th1t th2t pt];
-    eqn = sym(zeros(3,1));
-    eqn(1) = d1 == pt/(1+et*cos(th1t));
-    eqn(2) = d2 == pt/(1+et*cos(th2t));
-    eqn(3) = dth == th2t-th1t;
-    sol = vpasolve(eqn, var);
-    th1t = double(sol.th1t);
-    th2t = double(sol.th2t);
-    pt = double(sol.pt);
-    if isempty(th1t) || isempty(th2t) || isempty(pt) % returning NaN values if no solution is found
+    fun = @(x) [d2*(1 + et*cos(x(2))) - d1*(1 + et*cos(x(1)))
+                x(2) - x(1) - dth                            ];
+    x0 = [0 0];
+    sol = fsolve(fun, x0, optimset('Display', 'off'));
+    th1t = sol(1);
+    th2t = sol(2);
+    if abs(fun(sol)) > 1e-6 % returning NaN values if no solution is found
         dv = NaN;
         dt = NaN;
         kepElt = NaN;
@@ -89,7 +90,9 @@ if et ~= 0 && d1 ~= d2
         dt0 = NaN; 
         dt1 = NaN; 
         dt2 = NaN;
-        warning('Couldn''t find a solution for e = %.4f', et)
+        if strcmp(warnings,'on')
+            warning('Couldn''t find a solution for %c1 = %.2f°, %c2 = %.2f°, e = %.4f', 952, rad2deg(thm1), 952, rad2deg(thm2), et)
+        end
         return
     end
     th1t = rem(th1t, 2*pi);
@@ -100,6 +103,7 @@ if et ~= 0 && d1 ~= d2
     if th2t < 0
         th2t = th2t + 2*pi;
     end
+    pt = d1*(1+et*cos(th1t));
     ht = sqrt(pt*mu);
     ht = ht*k;
     I = [1; 0; 0];
@@ -122,9 +126,29 @@ if et ~= 0 && d1 ~= d2
     elseif et(3) < 0
         wt = 2*pi - acos((dot(et, Nt))/(norm(et)*norm(Nt)));
     end
-elseif et == 0 && d1 ~= d2
-    error('Maneuvering distances must be equal to each other as selected eccentricity is equal to 0')
-elseif et == 0 && d1 == d2
+elseif et == 0 && abs(d1-d2) >= 1e-6
+    dv = NaN;
+    dt = NaN;
+    kepElt = NaN;
+    th2t = NaN; 
+    dth = NaN; 
+    r1 = NaN; 
+    r2 = NaN; 
+    d1 = NaN; 
+    d2 = NaN; 
+    pt = NaN; 
+    v1 = NaN; 
+    vt1 = NaN; 
+    vt2 = NaN; 
+    v2 = NaN;
+    dt0 = NaN; 
+    dt1 = NaN; 
+    dt2 = NaN;
+    if strcmp(warnings,'on')
+        warning('Couldn''t find a solution for %c1 = %.2f°, %c2 = %.2f°, e = %.4f', 952, rad2deg(thm1), 952, rad2deg(thm2), et)
+    end
+    return
+elseif et == 0 && abs(d1-d2) < 1e-6
     pt = d1;
     ht = sqrt(pt*mu);
     ht = ht*k;
@@ -161,7 +185,9 @@ end
 et = norm(et);
 rpt = at*(1-et);
 if rpt < sh
-    warning('Possible Earth collision for e = %.4f', et)
+    if strcmp(warnings,'on')
+        warning('Possible Earth collision for %c1 = %.2f°, %c2 = %.2f°, e = %.4f', 952, rad2deg(thm1), 952, rad2deg(thm2), et)
+    end
 end
 kepElt = [at, et, rad2deg(it), rad2deg(Wt), rad2deg(wt), rad2deg(th1t)];
 

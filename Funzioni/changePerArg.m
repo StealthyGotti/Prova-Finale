@@ -34,8 +34,10 @@ dv = 2*sqrt(mu/p)*e*sin(abs(thm));
 dt = flightTime (a, e, rad2deg(thi), rad2deg(thm));
 
 thf = thm - dw;
-if thf < 2*pi
+if thf < 0
     thf = 2*pi + thf;
+elseif thf > 2*pi
+    thf = thf - 2*pi;
 end
 
 thm = rad2deg(thm);

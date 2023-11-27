@@ -39,12 +39,10 @@ else
     color = get(orb, 'Color');
 end
 
-if thf == kepEl(6) + 360
-    hold on
-    [p, ~] = kep2car (a, e, i, OM, om, 0, mu);
-    [a, ~] = kep2car (a, e, i, OM, om, 180, mu);
-    plot3([p(1) a(1)], [p(2) a(2)], [p(3) a(3)], 'Color', color, 'LineWidth', 1, 'LineStyle', '--')
-end
+hold on
+[p, ~] = kep2car (a, e, i, OM, om, 0, mu);
+[a, ~] = kep2car (a, e, i, OM, om, 180, mu);
+plot3(1.5*[p(1) a(1)], 1.5*[p(2) a(2)], 1.5*[p(3) a(3)], 'Color', color, 'LineWidth', 1, 'LineStyle', '--')
 
 %plot3(r0(1), r0(2), r0(3),'xr', 'LineWidth', 1)
 %plot3(rf(1), rf(2), rf(3),'xr', 'LineWidth', 1)
