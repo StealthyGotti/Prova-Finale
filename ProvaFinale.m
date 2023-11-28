@@ -29,9 +29,9 @@ plot3(rf(1), rf(2), rf(3), 'x', 'MarkerSize', 15, 'MarkerEdgeColor', 'r', 'LineW
 
 % Perigees
 [p1, ~] = kep2car(kepEli(1), kepEli(2), kepEli(3), kepEli(4), kepEli(5), 0, mu);
-plot3(p1(1), p1(2), p1(3),  'k.', 'MarkerSize', 30);
+plot3(p1(1), p1(2), p1(3),  'k.', 'MarkerSize', 30)
 [p2, ~] = kep2car(kepElf(1), kepElf(2), kepElf(3), kepElf(4), kepElf(5), 0, mu);
-plot3(p2(1), p2(2), p2(3), 'k.', 'MarkerSize', 30);
+plot3(p2(1), p2(2), p2(3), 'k.', 'MarkerSize', 30)
 
 % Equatorial Plane
 [x, y] = meshgrid(-1.5*10000:50:1.5*10000, -10000*1.5:50:1.5*10000);
@@ -43,8 +43,11 @@ zlim([-1.5*10000 1.5*10000])
 daspect([1 1 1])
 
 % Info
+% text(r0(1)+100, r0(2)+100, r0(3)+100, 'i', 'FontSize', 16, 'FontWeight', 'bold')
+% text(rf(1)+100, rf(2)+100, rf(3)+100, 'f', 'FontSize', 16, 'FontWeight', 'bold')
 legend('Initial Orbit', '', 'Initial Position', 'Final Orbit', '', 'Final position')
 title('Overview')
+view(30, 30)
 
 %% MANOVRA STANDARD (PAF)
 
@@ -75,53 +78,6 @@ plotOrbitQuiver([kepEli(1) kepEli(2) kepElf(3) kepElf(4) kepElf(5) th3], mu, 10,
 dv3 = dvi + dvf;
 plotOrbitQuiver([at et kepElf(3) kepElf(4) kepElf(5) 180], mu, 10, 0)
 
-% Esclusione manovra biellittica
-%{
-% % Manovra biellittica
-% rpf = kepElf(1)*(1-kepElf(2));
-% dv_vect = [];
-% dt_3b_vect = [];
-% rb = 8000:.01:9000;
-% 
-% for i = 1 : length(rb)
-%     [dv1, dv2, dv3, thf, dt_3b] = biElliptic (kepEli(1) , kepEli(2), ...
-%                                 kepElf(1) , kepElf(2), rb(i), 180);
-%     dv_vect = [ dv_vect ; dv1+dv2+dv3];
-%     dt_3b_vect = [ dt_3b_vect ; dt_3b ];
-% end
-% rt = 6378;
-% 
-% figure
-% plot( rb , dt_3b_vect )
-% xlabel ('rb')
-% ylabel( 'dt')
-% 
-% dv_vant = 0;
-% for i = 1 : length(dv_vect)
-%     if (dv_vect(i) < dv_3) && (rb(i) > rt+100)
-%         % disp('Vantaggioso e raggio ammissibile ')
-%         if dv_vant == 0
-%             dv_vant = dv_vect(i);
-%             rb_vant = rb(i);
-%         elseif dv_vect(i) < dv_vant
-%             dv_vant = dv_vect(i);
-%             rb_vant = rb(i);
-%             i_vant = i;
-%         end
-%     end
-% end
-% 
-% figure
-% plot( rb , dv_vect )
-% xlabel ('rb')
-% ylabel( 'dv')
-% yline( dv_3 , '--k')
-% xline ( rt+100 , '--k')
-% yline( dv_vant , '--r')
-% % Biellittica dv di poco vantaggioso per certi valori di rb, ma svantaggiosa 
-% % per il tempo (differenza di circa 6154s)
-%}
-
 % Attesa fino al punto finale
 plotOrbitQuiver([kepElf(1) kepElf(2) kepElf(3) kepElf(4) kepElf(5) 0], mu, 10, kepElf(6))
 
@@ -129,7 +85,8 @@ plotOrbitQuiver([kepElf(1) kepElf(2) kepElf(3) kepElf(4) kepElf(5) 0], mu, 10, k
 dvstd = dv1 + dv2 + dv3;
 fprintf('%cv complessivo procedura standard: %.2f km/s\n', 916, dvstd)
 dtstd = dt1 + dt2 + dt23 + dt3;
-fprintf('%ct complessivo procedura standard: %.0f s\n', 916, dtstd)
+[h, m, s] = time2esa(dtstd);
+fprintf('%ct complessivo procedura standard: %.0f s = %.0f hr %.0f min %.0f s\n', 916, dtstd, h, m, s)
 
 % Tutte le manovre sono eseguite alla prima posizione utile
 
@@ -139,29 +96,110 @@ ylim([-1.5*10000 1.5*10000])
 zlim([-1.5*10000 1.5*10000])
 
 legend('Init Pos', 'Fin Pos', 'Orb Init', 'Plane Changed', 'Periapsis Arg Changed', 'Shape Changed', 'Orb Fin')
-title('Strategia standard')
+title('Standard procedure')
 
-% ---------- DECIDERE STANDARD SCRITTURA MANOVRA --------------------------
+%% ALTRE MANOVRE
 
-%% STRATEGIA 2 MAVORA Anomalia-Piano-Forma
+%% MANOVRA BIELLITTICA
 
-% cambio anomalia -> cambio piano (causante un cambio di w) -> cambio forma
+% Si procede con un'analisi della convenienza al variare del raggio di apocentro della biellittica
 
-% ALLINEAMENTO ASSI ECCENTRICITA'
+% non-skip trials
+rbmin = 7000;
+rbmax = 100000;
+dvb = zeros(1,length(rbmin:100:rbmax));
+dtb = zeros(1,length(rbmin:100:rbmax));
+j = 1;
+for rb = rbmin : 100 : rbmax
+    [dv, dt] = biEllipticChangeOrb (kepEli, kepElf, rb);
+    dvb(j) = dv;
+    dtb(j) = dt;
+    j = j+1;
+end
+rb = rbmin : 100 : rbmax;
+figure
+set(gca, 'FontSize', 12)
+plot(rb, dvb, LineWidth=1)
+xlabel('rb [km]')
+ylabel('dv [km/s]')
+title('Velocity (no skip)')
+grid on
+figure
+set(gca, 'FontSize', 12)
+plot(rb, dtb/3600, LineWidth=1)
+xlabel('rb [km]')
+ylabel('dt [hr]')
+title('Time (no skip)')
+grid on
+dvbest = min(dvb);
+pos = find(dvb==dvbest);
+rbbest = rb(pos);
+reltime = dtb(pos);
+[h, m, s] = time2esa (reltime);
+fprintf('Situazione più conveniente al primo punto di manovra biellittica disponibile:\nrb = %d km | %cv = %.2f km/s | %ct = %d h %d m %.0f s\n', rbbest, 916, dvbest, 916, h, m, s)
 
-a_i = kepEli(1);
-e_i = kepEli(2); 
-i_i = kepEli(3);
-OM_i = kepEli(4); 
-om_i = kepEli(5); 
-th_i = kepEli(6);
+% Skip trials
+j = 1;
+for rb = rbmin : 100 : rbmax
+    [dv, dt] = biEllipticChangeOrb (kepEli, kepElf, rb, 'skip');
+    dvb(j) = dv;
+    dtb(j) = dt;
+    j = j+1;
+end
+rb = rbmin : 100 : rbmax;
+figure
+set(gca, 'FontSize', 12)
+plot(rb, dvb, LineWidth=1)
+xlabel('rb [km]')
+ylabel('dv [km/s]')
+title('Velocity (skip)')
+grid on
+figure
+set(gca, 'FontSize', 12)
+plot(rb, dtb/3600, LineWidth=1)
+xlabel('rb [km]')
+ylabel('dt [hr]')
+title('Time (skip)')
+grid on
+dvbest = min(dvb);
+pos = find(dvb==dvbest);
+rbbest = rb(pos);
+reltime = dtb(pos);
+[h, m, s] = time2esa (reltime);
+fprintf('Situazione più conveniente al secondo punto di manovra biellittica disponibile:\nrb = %d km | %cv = %.2f km/s | %ct = %d h %d m %.0f s\n', rbbest, 916, dvbest, 916, h, m, s)
 
-a_f = kepElf(1);
-e_f = kepElf(2); 
-i_f = kepElf(3);
-OM_f = kepElf(4); 
-om_f = kepElf(5); 
-theta_f = kepElf(6);
+% Rappresentazione manovra più conveniente in assoluto
+figure
+hold on
+grid on
+xlabel('X [km]')
+ylabel('Y [km]')
+zlabel('Z [km]')
+set(gca, 'FontSize', 12)
+plot3(r0(1), r0(2), r0(3), 'o', 'MarkerSize', 10, 'MarkerEdgeColor', 'r', 'LineWidth', 3)
+plot3(rf(1), rf(2), rf(3), 'x', 'MarkerSize', 15, 'MarkerEdgeColor', 'r', 'LineWidth', 3)
+pbaspect([1 1 1])
+daspect([1 1 1])
+[dvbi, dtbi, kepElt1, kepElt2, thm, thfb, axis] = biEllipticChangeOrb (kepEli, kepElf, 14000, 'skip');
+plotOrbitQuiver(kepEli, mu, 5, thm)
+plotOrbitQuiver([kepElt1(1) kepElt1(2) kepElt1(3) kepElt1(4) kepElt1(5) 0], mu, 5, 180) 
+plotOrbitQuiver([kepElt2(1) kepElt2(2) kepElt2(3) kepElt2(4) kepElt2(5) 180], mu, 5, 360)
+plotOrbitQuiver([kepElf(1) kepElf(2) kepElf(3) kepElf(4) kepElf(5) thfb], mu, 5, kepElf(6))
+% plotOrbit(kepEli, mu, .1)
+% plotOrbit(kepElt1, mu, .1)
+% plotOrbit(kepElt2, mu, .1)
+% plotOrbit(kepElf, mu, .1)
+plot3(1e4*[-axis(1) axis(1)], 1e4*[-axis(2) axis(2)], 1e4*[-axis(3) axis(3)], 'k--')
+Terra3d
+
+legend('Init Pos', 'Fin Pos', 'Orb Init', 'First Arch', 'Second Arch', 'Orb Fin', 'Man Axis')
+title('Bielliptic strategy')
+
+% DA VERIFICARE MEGLIO (OCCHIO)
+% valore minimo senza skip (prima manovra disponibile): 2.02 km/s @ 9300 km
+% valore minimo con skip (seconda manovra disponibile): 1.75 km/s @ 14000 km
+
+%% MANOVRA DIRETTA
 
 figure
 hold on
@@ -172,68 +210,142 @@ zlabel('Z [km]')
 set(gca, 'FontSize', 12)
 plot3(r0(1), r0(2), r0(3), 'o', 'MarkerSize', 10, 'MarkerEdgeColor', 'r', 'LineWidth', 3)
 plot3(rf(1), rf(2), rf(3), 'x', 'MarkerSize', 15, 'MarkerEdgeColor', 'r', 'LineWidth', 3)
+pbaspect([1 1 1])
+daspect([1 1 1])
 
-om_st = om_f - (144.1217 - om_f); % anomalia del perigeo "strategico", il quale permette di ottenere
-...in seguito al cambio di piano (nel corrispettivo punto di manovra) l'anomalia di perigeo richiesta per l'orbita finale.
+% ESEMPIO
+thm1 = 115.12; % da quale anomalia dell'orbita iniziale si vuole partire (default = kepEli(6), pos init)
+thm2 = 158.61; % a quale anomalia vera dell'orbita finale si vuole arrivare (default = kepElf(6), pos fin)
+et = 0.2183; % quale eccentricità si vuole che l'orbita di trasferimento abbia
+[dvdir, dtdir, kepElt, th2t, dth, r1, r2, d1, d2, pt, v1, vt1, vt2, v2, dt0, dt1, dt2] = directOrb (kepEli, kepElf, et, thm1, thm2);
 
-[dv_1, thm ,thf1, dt_1 ] = changePerArg (a_i, e_i, om_i , om_st , th_i);
-%[delta_T] = timeOfFlight (a_i,e_i,th_ir,thm);
+%[dv, dt, kepElt, th2t] = directOrb (kepEli, kepElf, kepEli(6), kepElf(6), 0);
+%plotOrbit(kepEli, mu, .1)
+%plotOrbit(kepElt, mu, .1)
+%plotOrbit(kepElf, mu, .1)
+plotOrbitQuiver(kepEli, mu, 5, thm1)
+plotOrbitQuiver(kepElt, mu, 5, th2t)
+plotOrbitQuiver([kepElf(1) kepElf(2) kepElf(3) kepElf(4) kepElf(5) thm2], mu, 5, kepElf(6))
 
-plotOrbitQuiver([a_i , e_i , i_i , OM_i , om_i , th_i ], mu, 20, thm)  % tratto 1
-hold on
-
-% CAMBIO DI PIANO (INCLINAZIONE + ASCENSIONE RETTA DEL NODO ASCENDENTE)
-
-[dv_2, wf , thf2, dt2] = changeOrbPlane (a_i, e_i, i_i, OM_i, om_st, i_f, OM_f, thf1);
-
-plotOrbitQuiver([a_i , e_i , i_i , OM_i , om_st , thf1 ], mu, 5 , thf2)  % tratto 2
-hold on
-plotOrbitQuiver([a_i , e_i , i_f , OM_f , wf , thf2 ], mu, 2 , 180 )  % tratto 3
-
-% Tempo di trasferimento dal punto di cambio a piano (thf2) al punto di cambio forma (apogeo: 180°)
-dt3 = flightTime (a_i, e_i, thf2, 180);
-
-hold on
-
-% CAMBIO FORMA
-% 1) apocentro -> pericentro
-[ delta_v31 , delta_t41 , a_t1 , e_t1] = changeOrbitShape(a_i , e_i , wf , a_f , e_f , wf , 1);
-
-% 2) pericentro -> apocentro
-%[ delta_v32 , delta_t42 , a_t2 , e_t2] = changeOrbitShape(a_i , e_i , wf , a_f , e_f , wf , 2);
-% NB: la seconda opzione sul cambio di forma richiede un tempo di
-... trasferimento molto maggiore 
-    
-plotOrbitQuiver([a_t1 , e_t1 , i_f , OM_f , wf , 180 ], mu, 20, 0) % tratto 4  % da rivedere
-
-hold on
-
-plotOrbitQuiver([a_f , e_f , i_f , OM_f , wf , 0 ], mu, 5, theta_f) % tratto 5
-
-% Tempo di trasferimento dal perigeo della nuova orbita al punto d'arrivo (theta_f)
-dt5 = flightTime (a_f, e_f, 0 , theta_f);
-
-hold on
+% Info su velocità
+quiver3(r1(1),r1(2),r1(3),1e3*v1(1),1e3*v1(2),1e3*v1(3))
+quiver3(r1(1),r1(2),r1(3),1e3*vt1(1),1e3*vt1(2),1e3*vt1(3))
+quiver3(r2(1),r2(2),r2(3),1e3*vt2(1),1e3*vt2(2),1e3*vt2(3))
+quiver3(r2(1),r2(2),r2(3),1e3*v2(1),1e3*v2(2),1e3*v2(3))
 
 Terra3d
-% 
-% plotOrbit(kepEli, mu, .1)
-% plot3(r0(1), r0(2), r0(3), 'o', 'MarkerSize', 10, 'MarkerEdgeColor', 'r', 'LineWidth', 3);
-% 
-% plotOrbit(kepElf, mu, .1)
-% plot3(rf(1), rf(2), rf(3), 'x', 'MarkerSize', 15, 'MarkerEdgeColor', 'r', 'LineWidth', 3);
+legend('Init Pos', 'Fin Pos', 'Orb Init', 'Orb Trans', 'Orb Fin', '1e3*v1', '1e3*vt1', '1e3*vt2', '1e3*v2')
+title('Direct transfer')
 
-legend('Init Pos', 'Fin Pos', 'Orb Init', 'Periapsis Arg Changed','Plane Changed', 'Shape Changed', 'Orb Fin')
-title('Trasferimento APF')
+[h, m, s] = time2esa (dtdir);
+fprintf('%cv complessivo manovra diretta: %.2f km/s\n', 916, dvdir)
+fprintf('%ct complessivo manovra diretta: %.0f s = %.0f hr %.0f min %.0f s\n', 916, dtdir, h, m, s)
 
-% COSTO TOTALE E TEMPO DI TRASFERIMENTO DELLA MISSIONE
+%% Trials on chosen combination
 
-dv_TOT = abs(dv_1) + abs(dv_2) + abs(delta_v31);                            % 2.3491 km/s
-dt_TOT_sec = dt_1 + dt2 + dt3 + delta_t41 + dt5;                            % 10335 sec
-dt_TOT_ore = (dt_TOT_sec)/3600;                                             % 2.8706 ore ~= 2 ore e 52 minuti
+dvdirvect = zeros(length(0.01:0.01:0.99), 1);
+dtdirvect = zeros(length(0.01:0.01:0.99), 1);
+for et = 0.01:0.01:0.99
+    [dvdir, dtdir] = directOrb (kepEli, kepElf, et, thm1, thm2);
+    dvdirvect(round(100*et)) = dvdir;
+    dtdirvect(round(100*et)) = dtdir;
+end
+et = 0.01:0.01:0.99;
 
-fprintf('%cv complessivo procedura Anomalia-Piano-Forma: %.2f km/s\n', 916, dv_TOT)
-fprintf('%cv complessivo procedura Anomalia-Piano-Forma: %.2f s\n', 916, dt_TOT_sec)
+figure
+hold on
+grid on
+xlabel('eccentricity')
+ylabel('dv [km/s] | dt [min]')
+set(gca, 'FontSize', 12)
+if mean(dtdirvect) < 60
+    plot(et(~isnan(dtdirvect)), dvdirvect(~isnan(dtdirvect)), et(~isnan(dtdirvect)), dtdirvect(~isnan(dtdirvect))/60, LineWidth=1)
+    legend('impulse [km/s]', 'time [min]')
+else
+    plot(et(~isnan(dtdirvect)), dvdirvect(~isnan(dtdirvect)), et(~isnan(dtdirvect)), dtdirvect(~isnan(dtdirvect))/3600, LineWidth=1)
+    legend('impulse [km/s]', 'time [hr]')
+end
+title(sprintf('Direct transfer analysis (%.2f° to %.2f°)', thm1, thm2))
 
+%% Absolute minimums reasearch
 
+% velocity-oriented min research
+ftarget = @(x) dirOrbv(kepEli, kepElf, x(1), x(2), x(3), 'off');
+x0 = [0.2, 120, 150];
+lb = [0.0001, 0, 0];
+ub = [0.9999, 360, 360];
+[xvmin, dvmin] = fminsearchbnd(ftarget, x0, lb, ub);
+dtv = dirOrbt(kepEli, kepElf, xvmin(1), xvmin(2), xvmin(3), 'off');
+[hv, mv, sv] = time2esa(dtv);
+fprintf('Absolute minimum possible impulse value: %cv = %.2f km/s @ [%c1 = %.2f°, %c2 = %.2f°, e = %.4f, %ct = %.0f s (%.0f hr %.0f min %.0f s)]\n', 916, dvmin, 952, xvmin(2), 952, xvmin(3), xvmin(1), 916, dtv, hv, mv, sv)
+figure
+hold on
+grid on
+xlabel('X [km]')
+ylabel('Y [km]')
+zlabel('Z [km]')
+set(gca, 'FontSize', 12)
+plot3(r0(1), r0(2), r0(3), 'o', 'MarkerSize', 10, 'MarkerEdgeColor', 'r', 'LineWidth', 3)
+plot3(rf(1), rf(2), rf(3), 'x', 'MarkerSize', 15, 'MarkerEdgeColor', 'r', 'LineWidth', 3)
+pbaspect([1 1 1])
+daspect([1 1 1])
+thm1 = xvmin(2);
+thm2 = xvmin(3);
+et = xvmin(1);
+[~, ~, kepElt, th2t, ~, r1, r2, ~, ~, ~, v1, vt1, vt2, v2] = directOrb (kepEli, kepElf, et, thm1, thm2);
+%[dv, dt, kepElt, th2t] = directOrb (kepEli, kepElf, kepEli(6), kepElf(6), 0);
+%plotOrbit(kepEli, mu, .1)
+%plotOrbit(kepElt, mu, .1)
+%plotOrbit(kepElf, mu, .1)
+plotOrbitQuiver(kepEli, mu, 5, thm1)
+plotOrbitQuiver(kepElt, mu, 5, th2t)
+plotOrbitQuiver([kepElf(1) kepElf(2) kepElf(3) kepElf(4) kepElf(5) thm2], mu, 5, kepElf(6))
+% Info su velocità
+quiver3(r1(1),r1(2),r1(3),1e3*v1(1),1e3*v1(2),1e3*v1(3))
+quiver3(r1(1),r1(2),r1(3),1e3*vt1(1),1e3*vt1(2),1e3*vt1(3))
+quiver3(r2(1),r2(2),r2(3),1e3*vt2(1),1e3*vt2(2),1e3*vt2(3))
+quiver3(r2(1),r2(2),r2(3),1e3*v2(1),1e3*v2(2),1e3*v2(3))
+Terra3d
+legend('Init Pos', 'Fin Pos', 'Orb Init', 'Orb Trans', 'Orb Fin', '1e3*v1', '1e3*vt1', '1e3*vt2', '1e3*v2')
+title('Most impulse-convenient direct transfer')
+view(30,30)
 
+% velocity-oriented min research
+ftarget = @(x) dirOrbt(kepEli, kepElf, x(1), x(2), x(3), 'off');
+x0 = [0.7, 110, 50];
+lb = [0.0001, 0, 0];
+ub = [0.9999, 360, 360];
+[xtmin, dtmin] = fminsearchbnd(ftarget, x0, lb, ub);
+[ht, mt, st] = time2esa(dtmin);
+fprintf('Absolute minimum possible flight time value: %ct = %.0f s (%.0f hr %.0f min %.0f s) @ [%c1 = %.2f°, %c2 = %.2f°, e = %.4f, %cv = %.2f km/s]\n', 916, dtmin, ht, mt, st, 952, xtmin(2), 952, xtmin(3), xtmin(1), 916, dirOrbv(kepEli, kepElf, xtmin(1), xtmin(2), xtmin(3), 'off'))
+figure
+hold on
+grid on
+xlabel('X [km]')
+ylabel('Y [km]')
+zlabel('Z [km]')
+set(gca, 'FontSize', 12)
+plot3(r0(1), r0(2), r0(3), 'o', 'MarkerSize', 10, 'MarkerEdgeColor', 'r', 'LineWidth', 3)
+plot3(rf(1), rf(2), rf(3), 'x', 'MarkerSize', 15, 'MarkerEdgeColor', 'r', 'LineWidth', 3)
+pbaspect([1 1 1])
+daspect([1 1 1])
+thm1 = xtmin(2);
+thm2 = xtmin(3);
+et = xtmin(1);
+[~, ~, kepElt, th2t, ~, r1, r2, ~, ~, ~, v1, vt1, vt2, v2] = directOrb (kepEli, kepElf, et, thm1, thm2);
+%[dv, dt, kepElt, th2t] = directOrb (kepEli, kepElf, kepEli(6), kepElf(6), 0);
+%plotOrbit(kepEli, mu, .1)
+%plotOrbit(kepElt, mu, .1)
+%plotOrbit(kepElf, mu, .1)
+plotOrbitQuiver(kepEli, mu, 5, thm1)
+plotOrbitQuiver(kepElt, mu, 5, th2t)
+plotOrbitQuiver([kepElf(1) kepElf(2) kepElf(3) kepElf(4) kepElf(5) thm2], mu, 5, kepElf(6))
+% Info su velocità
+quiver3(r1(1),r1(2),r1(3),1e3*v1(1),1e3*v1(2),1e3*v1(3))
+quiver3(r1(1),r1(2),r1(3),1e3*vt1(1),1e3*vt1(2),1e3*vt1(3))
+quiver3(r2(1),r2(2),r2(3),1e3*vt2(1),1e3*vt2(2),1e3*vt2(3))
+quiver3(r2(1),r2(2),r2(3),1e3*v2(1),1e3*v2(2),1e3*v2(3))
+Terra3d
+legend('Init Pos', 'Fin Pos', 'Orb Init', 'Orb Trans', 'Orb Fin', '1e3*v1', '1e3*vt1', '1e3*vt2', '1e3*v2')
+title('Most time-convenient direct transfer')
+view(30,30)
