@@ -1,4 +1,4 @@
-function [] = TableCompiler(KepOrb, dv, dt)
+function [] = TableCompiler(KepOrb, dv, dt, type)
 
 % Function TableCompiler create a .txt file and append all the data needed
 % to correctly compile the table of maneuvers.
@@ -7,6 +7,7 @@ function [] = TableCompiler(KepOrb, dv, dt)
 % - KepOrb: keplerian data of the orbit, in a KepEli-style standard
 % - dv:     delta v of the maneuver
 % - dt:     delta t of the maneuver
+% - type:   brief description of the maneuver, 0 if not needed 
 %
 % OUTPUT:
 % - none but it will display a message if a new file is created or an error
@@ -61,6 +62,14 @@ end
 
 % Data append
 file1 = fopen('ReportTable.txt', 'a');
+
+if type ~= 0
+    fprintf(file1, type);
+    fprintf(file1, '\n');
+    fprintf(file1, repmat('-', 1, 8*desiredLength+6));
+    fprintf(file1, '\n');
+end
+
 fprintf(file1, '%-s  |', dt);
 fprintf(file1, '%-s  |', a);
 fprintf(file1, '%-s  |', e);
