@@ -18,6 +18,10 @@ function [] = TableCompiler(KepOrb, dv, dt, type)
 % is normal to have two identical dt and dv on two rows, one next to
 % another
 
+if nargin==3
+    type = 0;
+end
+
 if length(KepOrb) ~= 6
     error('Check the size of the Keplerian element vector!');
 end
