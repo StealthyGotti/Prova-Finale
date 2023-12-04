@@ -45,6 +45,7 @@ daspect([1 1 1])
 % Info
 % text(r0(1)+100, r0(2)+100, r0(3)+100, 'i', 'FontSize', 16, 'FontWeight', 'bold')
 % text(rf(1)+100, rf(2)+100, rf(3)+100, 'f', 'FontSize', 16, 'FontWeight', 'bold')
+Terra3d
 legend('Initial Orbit', '', 'Initial Position', 'Final Orbit', '', 'Final position')
 title('Overview')
 view(30, 30)
@@ -79,12 +80,13 @@ dv3 = dvi + dvf;
 plotOrbitQuiver([at et kepElf(3) kepElf(4) kepElf(5) 180], mu, 10, 0)
 
 % Attesa fino al punto finale
+dt4 = flightTime(kepElf(1), kepElf(2), 0, kepElf(6));
 plotOrbitQuiver([kepElf(1) kepElf(2) kepElf(3) kepElf(4) kepElf(5) 0], mu, 10, kepElf(6))
 
 % Tiro delle somme
 dvstd = dv1 + dv2 + dv3;
 fprintf('%cv complessivo procedura standard: %.2f km/s\n', 916, dvstd)
-dtstd = dt1 + dt2 + dt23 + dt3;
+dtstd = dt1 + dt2 + dt23 + dt3 + dt4;
 [h, m, s] = time2esa(dtstd);
 fprintf('%ct complessivo procedura standard: %.0f s = %.0f hr %.0f min %.0f s\n', 916, dtstd, h, m, s)
 
@@ -195,47 +197,48 @@ Terra3d
 legend('Init Pos', 'Fin Pos', 'Orb Init', 'First Arch', 'Second Arch', 'Orb Fin', 'Man Axis')
 title('Bielliptic strategy')
 
-% DA VERIFICARE MEGLIO (OCCHIO)
-% valore minimo senza skip (prima manovra disponibile): 2.02 km/s @ 9300 km
-% valore minimo con skip (seconda manovra disponibile): 1.75 km/s @ 14000 km
-
 %% MANOVRA DIRETTA
 
-figure
-hold on
-grid on
-xlabel('X [km]')
-ylabel('Y [km]')
-zlabel('Z [km]')
-set(gca, 'FontSize', 12)
-plot3(r0(1), r0(2), r0(3), 'o', 'MarkerSize', 10, 'MarkerEdgeColor', 'r', 'LineWidth', 3)
-plot3(rf(1), rf(2), rf(3), 'x', 'MarkerSize', 15, 'MarkerEdgeColor', 'r', 'LineWidth', 3)
-pbaspect([1 1 1])
-daspect([1 1 1])
-
 % ESEMPIO
-thm1 = 115.12; % da quale anomalia dell'orbita iniziale si vuole partire (default = kepEli(6), pos init)
-thm2 = 158.61; % a quale anomalia vera dell'orbita finale si vuole arrivare (default = kepElf(6), pos fin)
-et = 0.2183; % quale eccentricità si vuole che l'orbita di trasferimento abbia
-[dvdir, dtdir, kepElt, th2t, dth, r1, r2, d1, d2, pt, v1, vt1, vt2, v2, dt0, dt1, dt2] = directOrb (kepEli, kepElf, et, thm1, thm2);
+thm1 = rand*360; % da quale anomalia dell'orbita iniziale si vuole partire (default = kepEli(6), pos init)
+thm2 = rand*360; % a quale anomalia vera dell'orbita finale si vuole arrivare (default = kepElf(6), pos fin)
+et = rand; % quale eccentricità si vuole che l'orbita di trasferimento abbia
+[dvdir, dtdir, kepElt, th2t, dth, r1, r2, d1, d2, pt, v1, vt1, dv1, vt2, v2, dv2, dt0, dt1, dt2, thc1t, thc2t] = directOrb (kepEli, kepElf, et, thm1, thm2, 'best', 'on');
+th1t = kepElt(6);
 
-%[dv, dt, kepElt, th2t] = directOrb (kepEli, kepElf, kepEli(6), kepElf(6), 0);
-%plotOrbit(kepEli, mu, .1)
-%plotOrbit(kepElt, mu, .1)
-%plotOrbit(kepElf, mu, .1)
-plotOrbitQuiver(kepEli, mu, 5, thm1)
-plotOrbitQuiver(kepElt, mu, 5, th2t)
-plotOrbitQuiver([kepElf(1) kepElf(2) kepElf(3) kepElf(4) kepElf(5) thm2], mu, 5, kepElf(6))
+directGraphics (d1, d2, dth, et, th1t, th2t) % see graphical solution for requested situation
 
-% Info su velocità
-quiver3(r1(1),r1(2),r1(3),1e3*v1(1),1e3*v1(2),1e3*v1(3))
-quiver3(r1(1),r1(2),r1(3),1e3*vt1(1),1e3*vt1(2),1e3*vt1(3))
-quiver3(r2(1),r2(2),r2(3),1e3*vt2(1),1e3*vt2(2),1e3*vt2(3))
-quiver3(r2(1),r2(2),r2(3),1e3*v2(1),1e3*v2(2),1e3*v2(3))
-
-Terra3d
-legend('Init Pos', 'Fin Pos', 'Orb Init', 'Orb Trans', 'Orb Fin', '1e3*v1', '1e3*vt1', '1e3*vt2', '1e3*v2')
-title('Direct transfer')
+if ~isnan(dvdir)
+    figure
+    hold on
+    grid on
+    xlabel('X [km]')
+    ylabel('Y [km]')
+    zlabel('Z [km]')
+    set(gca, 'FontSize', 12)
+    plot3(r0(1), r0(2), r0(3), 'o', 'MarkerSize', 10, 'MarkerEdgeColor', 'r', 'LineWidth', 3)
+    plot3(rf(1), rf(2), rf(3), 'x', 'MarkerSize', 15, 'MarkerEdgeColor', 'r', 'LineWidth', 3)
+    % pbaspect([1 1 1])
+    % daspect([1 1 1])
+    view(30, 30)
+    
+    %plotOrbit(kepEli, mu, .1)
+    %plotOrbit(kepElt, mu, .1)
+    %plotOrbit(kepElf, mu, .1)
+    plotOrbitQuiver(kepEli, mu, 5, thm1)
+    plotOrbitQuiver(kepElt, mu, 5, th2t)
+    plotOrbitQuiver([kepElf(1) kepElf(2) kepElf(3) kepElf(4) kepElf(5) thm2], mu, 5, kepElf(6))
+    
+    % Info su velocità
+    quiver3(r1(1),r1(2),r1(3),1e3*v1(1),1e3*v1(2),1e3*v1(3))
+    quiver3(r1(1),r1(2),r1(3),1e3*vt1(1),1e3*vt1(2),1e3*vt1(3))
+    quiver3(r2(1),r2(2),r2(3),1e3*vt2(1),1e3*vt2(2),1e3*vt2(3))
+    quiver3(r2(1),r2(2),r2(3),1e3*v2(1),1e3*v2(2),1e3*v2(3))
+    
+    Terra3d
+    legend('Init Pos', 'Fin Pos', 'Orb Init', 'Orb Trans', 'Orb Fin', '1e3*v1', '1e3*vt1', '1e3*vt2', '1e3*v2')
+    title('Direct transfer')
+end
 
 [h, m, s] = time2esa (dtdir);
 fprintf('%cv complessivo manovra diretta: %.2f km/s\n', 916, dvdir)
@@ -270,14 +273,14 @@ title(sprintf('Direct transfer analysis (%.2f° to %.2f°)', thm1, thm2))
 %% Absolute minimums reasearch
 
 % velocity-oriented min research
-ftarget = @(x) dirOrbv(kepEli, kepElf, x(1), x(2), x(3), 'off');
+ftarget = @(x) dirOrbv(kepEli, kepElf, x(1), x(2), x(3));
 x0 = [0.2, 120, 150];
 lb = [0.0001, 0, 0];
 ub = [0.9999, 360, 360];
-[xvmin, dvmin] = fminsearchbnd(ftarget, x0, lb, ub);
-dtv = dirOrbt(kepEli, kepElf, xvmin(1), xvmin(2), xvmin(3), 'off');
+[xvmin, dvmin] = fminsearchbnd(ftarget, x0, lb, ub, optimset('Display','off'));
+dtv = dirOrbt(kepEli, kepElf, xvmin(1), xvmin(2), xvmin(3));
 [hv, mv, sv] = time2esa(dtv);
-fprintf('Absolute minimum possible impulse value: %cv = %.2f km/s @ [%c1 = %.2f°, %c2 = %.2f°, e = %.4f, %ct = %.0f s (%.0f hr %.0f min %.0f s)]\n', 916, dvmin, 952, xvmin(2), 952, xvmin(3), xvmin(1), 916, dtv, hv, mv, sv)
+fprintf('Absolute minimum possible direct impulse value: %cv = %.2f km/s @ [%c1 = %.2f°, %c2 = %.2f°, e = %.4f, %ct = %.0f s (%.0f hr %.0f min %.0f s)]\n', 916, dvmin, 952, xvmin(2), 952, xvmin(3), xvmin(1), 916, dtv, hv, mv, sv)
 figure
 hold on
 grid on
@@ -292,8 +295,7 @@ daspect([1 1 1])
 thm1 = xvmin(2);
 thm2 = xvmin(3);
 et = xvmin(1);
-[~, ~, kepElt, th2t, ~, r1, r2, ~, ~, ~, v1, vt1, vt2, v2] = directOrb (kepEli, kepElf, et, thm1, thm2);
-%[dv, dt, kepElt, th2t] = directOrb (kepEli, kepElf, kepEli(6), kepElf(6), 0);
+[~, ~, kepElt, th2t, ~, r1, r2, ~, ~, ~, v1, vt1, ~,  vt2, v2] = directOrb (kepEli, kepElf, et, thm1, thm2);
 %plotOrbit(kepEli, mu, .1)
 %plotOrbit(kepElt, mu, .1)
 %plotOrbit(kepElf, mu, .1)
@@ -306,18 +308,22 @@ quiver3(r1(1),r1(2),r1(3),1e3*vt1(1),1e3*vt1(2),1e3*vt1(3))
 quiver3(r2(1),r2(2),r2(3),1e3*vt2(1),1e3*vt2(2),1e3*vt2(3))
 quiver3(r2(1),r2(2),r2(3),1e3*v2(1),1e3*v2(2),1e3*v2(3))
 Terra3d
+% plotOrbit(kepEli,mu,.1)
+% plotOrbit(kepElt,mu,.1)
+% plotOrbit(kepElf,mu,.1)
 legend('Init Pos', 'Fin Pos', 'Orb Init', 'Orb Trans', 'Orb Fin', '1e3*v1', '1e3*vt1', '1e3*vt2', '1e3*v2')
 title('Most impulse-convenient direct transfer')
 view(30,30)
 
-% velocity-oriented min research
-ftarget = @(x) dirOrbt(kepEli, kepElf, x(1), x(2), x(3), 'off');
-x0 = [0.7, 110, 50];
+% time-oriented min research
+ftarget = @(x) dirOrbt(kepEli, kepElf, x(1), x(2), x(3));
+x0 = [0.7, 130, 50];
 lb = [0.0001, 0, 0];
 ub = [0.9999, 360, 360];
-[xtmin, dtmin] = fminsearchbnd(ftarget, x0, lb, ub);
+[xtmin, dtmin] = fminsearchbnd(ftarget, x0, lb, ub, optimset('Display','off'));
 [ht, mt, st] = time2esa(dtmin);
-fprintf('Absolute minimum possible flight time value: %ct = %.0f s (%.0f hr %.0f min %.0f s) @ [%c1 = %.2f°, %c2 = %.2f°, e = %.4f, %cv = %.2f km/s]\n', 916, dtmin, ht, mt, st, 952, xtmin(2), 952, xtmin(3), xtmin(1), 916, dirOrbv(kepEli, kepElf, xtmin(1), xtmin(2), xtmin(3), 'off'))
+dvt = dirOrbv(kepEli, kepElf, xtmin(1), xtmin(2), xtmin(3));
+fprintf('Absolute minimum possible direct flight time value: %ct = %.0f s (%.0f hr %.0f min %.0f s) @ [%c1 = %.2f°, %c2 = %.2f°, e = %.4f, %cv = %.2f km/s]\n', 916, dtmin, ht, mt, st, 952, xtmin(2), 952, xtmin(3), xtmin(1), 916, dvt)
 figure
 hold on
 grid on
@@ -332,8 +338,7 @@ daspect([1 1 1])
 thm1 = xtmin(2);
 thm2 = xtmin(3);
 et = xtmin(1);
-[~, ~, kepElt, th2t, ~, r1, r2, ~, ~, ~, v1, vt1, vt2, v2] = directOrb (kepEli, kepElf, et, thm1, thm2);
-%[dv, dt, kepElt, th2t] = directOrb (kepEli, kepElf, kepEli(6), kepElf(6), 0);
+[~, ~, kepElt, th2t, ~, r1, r2, ~, ~, ~, v1, vt1, ~, vt2, v2] = directOrb (kepEli, kepElf, et, thm1, thm2);
 %plotOrbit(kepEli, mu, .1)
 %plotOrbit(kepElt, mu, .1)
 %plotOrbit(kepElf, mu, .1)
@@ -346,6 +351,173 @@ quiver3(r1(1),r1(2),r1(3),1e3*vt1(1),1e3*vt1(2),1e3*vt1(3))
 quiver3(r2(1),r2(2),r2(3),1e3*vt2(1),1e3*vt2(2),1e3*vt2(3))
 quiver3(r2(1),r2(2),r2(3),1e3*v2(1),1e3*v2(2),1e3*v2(3))
 Terra3d
+% plotOrbit(kepEli,mu,.1)
+% plotOrbit(kepElt,mu,.1)
+% plotOrbit(kepElf,mu,.1)
 legend('Init Pos', 'Fin Pos', 'Orb Init', 'Orb Trans', 'Orb Fin', '1e3*v1', '1e3*vt1', '1e3*vt2', '1e3*v2')
 title('Most time-convenient direct transfer')
 view(30,30)
+
+%% Finding velocity & time minimum combinations
+
+stepth0 = 60; % angle resolution (recommended: 60°)
+thm10min = 0;
+thm10max = 360;
+thm20min = 0;
+thm20max = 360;
+stepe0 = .1; % eccentricity resolution (recommended: 0.1)
+et0min = .1;
+et0max = .9;
+et0 = et0min:stepe0:et0max;
+thm10 = thm10min:stepth0:thm10max;
+thm20 = thm20min:stepth0:thm20max;
+lb = [0.0001, 0, 0];
+ub = [0.9999, 360, 360];
+ftarget = @(x) dirOrbv(kepEli, kepElf, x(1), x(2), x(3));
+
+Dv = zeros(length(et0)*length(thm10)*length(thm20), 5);
+i = 0;
+tic
+for et0 = et0min:stepe0:et0max
+    for thm10 = thm10min:stepth0:thm10max
+        for thm20 = thm20min:stepth0:thm20max
+            x0 = [et0, thm10, thm20];
+            [xvmin, dvmin] = fminsearchbnd(ftarget, x0, lb, ub, optimset('Display','off'));
+            i = i + 1;
+            dtv = dirOrbt(kepEli, kepElf, xvmin(1), xvmin(2), xvmin(3));
+            Dv(i, :) = [dvmin dtv xvmin];
+        end
+    end
+end
+elapsed = toc;
+[h, m, s] = time2esa(elapsed);
+fprintf('Velocity minimums found: %d\n', i)
+fprintf('Time elapsed: %.0f hr %.0f min %.0f s\n', h, m, s)
+Dv = Dv(isfinite(Dv(:,1)), :);
+Dv(:, end+1) = Dv(:, 1) / norm(Dv(:, 1));
+Dv(:, end+1) = Dv(:, 2) / norm(Dv(:, 2));
+wv = 100; % importance given to velocity
+wt = 0; % importance given to time
+Dv(:, end+1) = wv*Dv(:, end-1)+wt*Dv(:, end);
+Dv = sortrows(Dv, size(Dv, 2));
+Dv = Dv(:, 1:5);
+
+Dt = zeros(length(et0)*length(thm10)*length(thm20), 5);
+j = 0;
+tic
+for et0 = et0min:stepe0:et0max
+    for thm10 = thm10min:stepth0:thm10max
+        for thm20 = thm20min:stepth0:thm20max
+            ftarget = @(x) dirOrbt(kepEli, kepElf, x(1), x(2), x(3));
+            x0 = [et0, thm10, thm20];
+            [xtmin, dtmin] = fminsearchbnd(ftarget, x0, lb, ub, optimset('Display','off'));
+            j = j + 1;
+            dvt = dirOrbv(kepEli, kepElf, xtmin(1), xtmin(2), xtmin(3));
+            Dt(j, :) = [dvt dtmin xtmin];
+        end
+    end
+end
+elapsed = toc;
+[h, m, s] = time2esa(elapsed);
+fprintf('Time minimums found: %d\n', j)
+fprintf('Time elapsed: %.0f hr %.0f min %.0f s\n', h, m, s)
+Dt = Dt(isfinite(Dt(:,1)), :);
+Dt(:, end+1) = Dt(:, 1) / norm(Dt(:, 1));
+Dt(:, end+1) = Dt(:, 2) / norm(Dt(:, 2));
+wv = 0; % importance given to velocity
+wt = 100; % importance given to time
+Dt(:, end+1) = wv*Dt(:, end-1)+wt*Dt(:, end);
+Dt = sortrows(Dt, size(Dt, 2));
+Dt = Dt(:, 1:5);
+
+%% Finding best overall direct transfer
+
+Dv = Dv(isfinite(Dv(:,1)), :);
+Dt = Dt(isfinite(Dt(:,1)), :);
+
+% Dt = Dt(Dt(:, 2)<min(Dv(:, 2)), :);
+% Dv = Dv(Dv(:, 1)<min(Dt(:, 1)), :);
+
+Dv = sortrows(Dv, 1);
+[~, dvs] = uniquetol(Dv(:,1), 1e-2, 'DataScale', 1);
+Dt = sortrows(Dt, 2);
+[~, dts] = uniquetol(Dt(:,2), 60, 'DataScale', 1);
+
+figure
+scatter(Dv(dvs,2)/3600, Dv(dvs,1), 'b', 'filled')
+grid minor
+xlabel('Time [hr]', 'Interpreter', 'latex')
+ylabel('Impulse [km/s]', 'Interpreter', 'latex')
+title('Impulse minimums vs. Time', 'Interpreter', 'latex')
+set(gca, 'FontSize', 12)
+
+figure
+scatter(Dt(dts,2)/3600, Dt(dts,1), 'r', 'filled')
+grid minor
+xlabel('Time [hr]', 'Interpreter', 'latex')
+ylabel('Impulse [km/s]', 'Interpreter', 'latex')
+title('Time minimums vs. Impulse', 'Interpreter', 'latex')
+set(gca, 'FontSize', 12)
+
+figure
+hold on
+grid minor
+scatter(Dv(dvs,2)/3600, Dv(dvs,1), 'b', 'filled')
+scatter(Dt(dts,2)/3600, Dt(dts,1), 'r', 'filled')
+xlabel('Time [hr]', 'Interpreter', 'latex')
+ylabel('Impulse [km/s]', 'Interpreter', 'latex')
+legend('Impulse minimums vs. Time', 'Time minimums vs. Impulse', 'Interpreter', 'latex')
+title('Minimum direct trasfer combinations', 'Interpreter', 'latex')
+set(gca, 'FontSize', 12)
+
+D = [Dv; Dt];
+D = D(isfinite(D(:,1)), :);
+D(:, end+1) = D(:, 1) / norm(D(:, 1));
+D(:, end+1) = D(:, 2) / norm(D(:, 2));
+% D(:, end+1) = (D(:, 1) - mean(D(:, 1))) / std(D(:, 1));
+% D(:, end+1) = (D(:, 2) - mean(D(:, 2))) / std(D(:, 2));
+% D(:, end+1) = (D(:, 1) - min(D(:, 1))) / (max(D(:, 1)) - min(D(:, 1)));
+% D(:, end+1) = (D(:, 2) - min(D(:, 2))) / (max(D(:, 2)) - min(D(:, 2)));
+wv = 90; % importance given to velocity
+wt = 10; % importance given to time
+D(:, end+1) = 1./(wv*D(:, end-1)+wt*D(:, end)); % convenience
+D = sortrows(D, size(D, 2), 'descend');
+D = D(:, 1:5);
+
+dirbest = D(1, 3:end); % best overall maneuver
+et = dirbest(1);
+thm1 = dirbest(2);
+thm2 = dirbest(3);
+
+figure
+hold on
+grid on
+xlabel('$X$ [km]', 'Interpreter', 'latex')
+ylabel('$Y$ [km]', 'Interpreter', 'latex')
+zlabel('$Z$ [km]', 'Interpreter', 'latex')
+set(gca, 'FontSize', 12)
+plot3(r0(1), r0(2), r0(3), 'o', 'MarkerSize', 10, 'MarkerEdgeColor', 'r', 'LineWidth', 3)
+plot3(rf(1), rf(2), rf(3), 'x', 'MarkerSize', 15, 'MarkerEdgeColor', 'r', 'LineWidth', 3)
+[dvdir, dtdir, kepElt, th2t, ~, r1, r2, ~, ~, ~, v1, vt1, ~, vt2, v2, ~, ~, ~, ~] = directOrb (kepEli, kepElf, et, thm1, thm2);
+[h, m, s] = time2esa (dtdir);
+fprintf('%cv complessivo manovra diretta ottimale: %.2f km/s\n', 916, dvdir)
+fprintf('%ct complessivo manovra diretta ottimale: %.0f s = %.0f hr %.0f min %.0f s\n', 916, dtdir, h, m, s)
+
+%plotOrbit(kepEli, mu, .1)
+%plotOrbit(kepElt, mu, .1)
+%plotOrbit(kepElf, mu, .1)
+plotOrbitQuiver(kepEli, mu, 5, thm1)
+plotOrbitQuiver(kepElt, mu, 5, th2t)
+plotOrbitQuiver([kepElf(1) kepElf(2) kepElf(3) kepElf(4) kepElf(5) thm2], mu, 5, kepElf(6))
+
+% Info su velocità
+quiver3(r1(1),r1(2),r1(3),1e3*v1(1),1e3*v1(2),1e3*v1(3))
+quiver3(r1(1),r1(2),r1(3),1e3*vt1(1),1e3*vt1(2),1e3*vt1(3))
+quiver3(r2(1),r2(2),r2(3),1e3*vt2(1),1e3*vt2(2),1e3*vt2(3))
+quiver3(r2(1),r2(2),r2(3),1e3*v2(1),1e3*v2(2),1e3*v2(3))
+
+Terra3d
+legend('Init Pos', 'Fin Pos', 'Orb Init', 'Orb Trans', 'Orb Fin', '$v1 \cdot 10^3$', '$vt1 \cdot 10^3$', '$vt1 \cdot 10^3$', '$v2 \cdot 10^3$', 'Interpreter', 'latex')
+title(sprintf('Best overall direct transfer'), 'Interpreter', 'latex')
+fprintf('Best overall direct transfer: from %.2f° to %.2f° at e = %.4f\n', thm1, thm2, et)
+view(30, 30)
