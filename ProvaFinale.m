@@ -62,31 +62,44 @@ set(gca, 'FontSize', 12)
 plot3(r0(1), r0(2), r0(3), 'o', 'MarkerSize', 10, 'MarkerEdgeColor', 'r', 'LineWidth', 3)
 plot3(rf(1), rf(2), rf(3), 'x', 'MarkerSize', 15, 'MarkerEdgeColor', 'r', 'LineWidth', 3)
 
+% Table Compiling, Initial data
+TableCompiler( kepEli , 0 , 0, 'Given initial data')
 % Attesa fino al punto di manovra, cambio piano
 [dv1, w1, th1, dt1] = changeOrbPlane (kepEli(1), kepEli(2), kepEli(3), kepEli(4), kepEli(5), kepElf(3), kepElf(4), kepEli(6));
 plotOrbitQuiver(kepEli, mu, 10, th1)
+% Table Compiling, plane change
+TableCompiler( [kepEli(1:5) th1] , dv1 , dt1, 'Standard maneuver')
+TableCompiler( [kepEli(1:2) kepElf(3:4) w1 th1], dv1 , dt1)
 
 % Attesa fino al punto di manovra, cambio di anomalia del pericentro
 [dv2, th2, th3, dt2] = changePerArg (kepEli(1), kepEli(2), w1 , kepElf(5) , th1);
 plotOrbitQuiver([kepEli(1) kepEli(2) kepElf(3) kepElf(4) w1 th1], mu, 10, th2)
+TableCompiler( [kepEli(1) kepEli(2) kepElf(3) kepElf(4) w1 th1] , dv2 ,dt1 + dt2 )
+TableCompiler( [kepEli(1) kepEli(2) kepElf(3) kepElf(4) kepElf(5) th3] , dv2 , dt1 + dt2 )
 
 % Attesa fino al punto di manovra di cambio di forma dell'orbita
 dt23 = flightTime( kepEli(1) , kepEli(2) , th3 , 180); % tempo per arrivare all'apogeo
 plotOrbitQuiver([kepEli(1) kepEli(2) kepElf(3) kepElf(4) kepElf(5) th3], mu, 10, 180)
+TableCompiler( [kepEli(1) kepEli(2) kepElf(3) kepElf(4) kepElf(5) 180] , 0 , dt1+dt2+dt23 )
 
 % Manovra bitangente all'apogeo, cambio di forma dell'orbita
 [dvi, dvf, thf, dt3, at, et] = biTangent (kepEli(1) , kepEli(2), kepElf(1) , kepElf(2), 180);
 dv3 = dvi + dvf;
 plotOrbitQuiver([at et kepElf(3) kepElf(4) kepElf(5) 180], mu, 10, 0)
+TableCompiler( [kepEli(1) kepEli(2) kepElf(3) kepElf(4) kepElf(5) 180] , dvi , dt1+dt2+dt23)
+TableCompiler( [at et kepElf(3) kepElf(4) kepElf(5) thf] , dvi , dt1+dt2+dt23)
+TableCompiler( [at et kepElf(3) kepElf(4) kepElf(5) thf] , dvf , dt1+dt2+dt23+dt3)
+TableCompiler( [kepElf(1:5) thf] , dvf , dt1+dt2+dt23+dt3)
 
 % Attesa fino al punto finale
-dt4 = flightTime(kepElf(1), kepElf(2), 0, kepElf(6));
+dt34 = flightTime ( kepElf(1) , kepElf(2) , 0 , kepElf(6));
 plotOrbitQuiver([kepElf(1) kepElf(2) kepElf(3) kepElf(4) kepElf(5) 0], mu, 10, kepElf(6))
+TableCompiler( [kepElf(1:6)] , 0 , dt1+dt2+dt23+dt3+dt34)
 
 % Tiro delle somme
 dvstd = dv1 + dv2 + dv3;
 fprintf('%cv complessivo procedura standard: %.2f km/s\n', 916, dvstd)
-dtstd = dt1 + dt2 + dt23 + dt3 + dt4;
+dtstd = dt1 + dt2 + dt23 + dt3 + dt34;
 [h, m, s] = time2esa(dtstd);
 fprintf('%ct complessivo procedura standard: %.0f s = %.0f hr %.0f min %.0f s\n', 916, dtstd, h, m, s)
 
@@ -99,6 +112,7 @@ zlim([-1.5*10000 1.5*10000])
 
 legend('Init Pos', 'Fin Pos', 'Orb Init', 'Plane Changed', 'Periapsis Arg Changed', 'Shape Changed', 'Orb Fin')
 title('Standard procedure')
+
 
 %% ALTRE MANOVRE
 
