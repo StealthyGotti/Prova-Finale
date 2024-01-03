@@ -61,7 +61,6 @@ om_st = om_f - (144.12175 - om_f); % anomalia del perigeo "strategico", il quale
 ...in seguito al cambio di piano (nel corrispettivo punto di manovra) l'anomalia di perigeo richiesta per l'orbita finale.
 
 [dv_1, thm ,thf1, dt1 ] = changePerArg (a_i, e_i, om_i , om_st , th_i);
-%[delta_T] = timeOfFlight (a_i,e_i,th_ir,thm);
 
 plotOrbitQuiver([a_i , e_i , i_i , OM_i , om_i , th_i ], mu, 5 , thm)  % tratto 1
 hold on
